@@ -1,0 +1,200 @@
+table {
+	border-collapse: collapse;
+}
+
+#menu {
+	z-index: 10;
+	position: fixed;
+	height: 70px;
+	background-color: #e6e6e6;
+	border: 1px solid #cccccc;
+	border-width: 0 0 1px 0;
+	width: 100%;
+	text-align: center;
+	box-shadow: 0 2px 5px #cccccc;
+	-o-box-shadow: 0 2px 5px #cccccc;
+	-ms-box-shadow: 0 2px 5px #cccccc;
+	-moz-box-shadow: 0 2px 5px #cccccc;
+	-webkit-box-shadow: 0 2px 5px #cccccc;
+}
+
+#menuTable td {
+	padding: 5 10 0 7;
+}
+
+#title {
+	font-size: 27px;
+	color: #a0a0a0;
+}
+
+#idL {
+	font-size: 13px;
+}
+
+#id {
+	font-size: 18px;
+}
+
+#userMenu {
+	position: relative;
+	top: 105px;
+	bottom: 85px;
+	right: -310px;
+	z-index: 10;
+	position: fixed;
+	width: 310px;
+	border-radius: 10px 0 0 10px;
+	background-color: #e6e6e6;
+	border: 1px solid #cccccc;
+	border-width: 1px 0 1px 1px;
+	text-align: center;
+	transition: right 0.3s ease-in-out;
+	-o-transition: right 0.3s ease-in-out;
+	-ms-transition: right 0.3s ease-in-out;
+	-moz-transition: right 0.3s ease-in-out;
+	-webkit-transition: right 0.3s ease-in-out;
+}
+
+#umTableCont {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	left: 20px;
+	bottom: 20px;
+}
+
+#umTable {
+	height: 100%;
+	width: 270px;
+	overflow: hidden;
+	border-collapse: collapse;
+}
+
+#messagesBox {
+	height: 100%;
+	width: 270px;
+	overflow: scroll;
+	background-color: #e8e8e8;
+}
+
+.message {
+	width: 270px;
+	overflow: scroll;
+	padding: 1px 6px 1px 6px;
+}
+
+#textInput {
+	height: 100%;
+	width: 200px;
+	border: none;
+	background-color: #c4c4c4;
+	font-size: 15px;
+	padding: 8px;
+	outline: none;
+	color: #606060;
+}
+
+::-webkit-input-placeholder {
+   color: #888888;
+}
+
+:-moz-placeholder {
+   color: red;  
+}
+
+::-moz-placeholder {
+   color: red;  
+}
+
+:-ms-input-placeholder {
+   color: red;  
+}
+
+#sendButton {
+	background-color: #e6e6e6;
+	height: 40px;
+	font-size: 13px;
+	padding: 0;
+	margin: 0;
+	border-radius: 0;
+	border: none;
+}
+
+#umButton {
+	bottom: 0;
+	right: 0;
+	z-index: 10;
+	position: fixed;
+	height: 70px;
+	width: 70px;
+	border-radius: 10px 0 0 0;
+	background-color: #e6e6e6;
+	border: 1px solid #cccccc;
+	border-width: 1px 0 0 1px;
+	text-align: center;
+}
+
+#umbTable {
+	height: 100%;
+	width: 90%;
+}
+
+#arrowImg {
+	opacity: 0.75;
+	z-index: 15;
+	transition: opacity 0.2s ease-in-out;
+	-o-transition: opacity 0.2s ease-in-out;
+	-ms-transition: opacity 0.2s ease-in-out;
+	-moz-transition: opacity 0.2s ease-in-out;
+	-webkit-transition: opacity 0.2s ease-in-out;
+}
+#arrowImg:hover {
+	opacity: 0.95;
+}
+
+#mainTable {
+	position: absolute;
+	top: 105px;
+	bottom: 0px;
+	height: 75%;
+	width: 100%;
+	opacity: 0.5;
+	transition: opacity 0.4s ease-in-out;
+	-o-transition: opacity 0.4s ease-in-out;
+	-ms-transition: opacity 0.4s ease-in-out;
+	-moz-transition: opacity 0.4s ease-in-out;
+	-webkit-transition: opacity 0.4s ease-in-out;
+	pointer-events: none;
+}
+
+#mainTable td {
+	text-align: center;
+}
+
+#mainTD {
+	opacity: 0.5;
+	transition: opacity 0.4s ease-in-out;
+	-o-transition: opacity 0.4s ease-in-out;
+	-ms-transition: opacity 0.4s ease-in-out;
+	-moz-transition: opacity 0.4s ease-in-out;
+	-webkit-transition: opacity 0.4s ease-in-out;
+	pointer-events: none;
+}
+
+#turnLabel {
+	font-size: 26px;
+}
+
+#turn {
+	font-size: 26px;
+}
+
+#start {
+	opacity: 0.5;
+	transition: opacity 0.4s ease-in-out;
+	-o-transition: opacity 0.4s ease-in-out;
+	-ms-transition: opacity 0.4s ease-in-out;
+	-moz-transition: opacity 0.4s ease-in-out;
+	-webkit-transition: opacity 0.4s ease-in-out;
+	pointer-events: none;
+}

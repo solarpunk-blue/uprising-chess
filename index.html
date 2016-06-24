@@ -1,0 +1,108 @@
+<html>
+	<head>
+		<title>Chessroom</title>
+		<link rel="icon" href="img/chesspieces/wikipedia/wR.png" type="image/png">
+		<link rel="stylesheet" href="css/chessboard-0.3.0.min.css">
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
+	</head>
+	<body>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/3.0.5/firebase-app.js"></script>
+  		<script src="https://www.gstatic.com/firebasejs/3.0.5/firebase-auth.js"></script>
+  		<script src="https://www.gstatic.com/firebasejs/3.0.5/firebase-database.js"></script>
+		<script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+		<script src="js/chessboard-0.3.0.min.js"></script>
+		<script src="js/app.js"></script>
+		<div id = 'menu'>
+			<table id = 'menuTable'>
+				<tr>
+					<td>
+						<img src = 'img/chesspieces/wikipedia/wR.png' height = '60px'>
+					</td>
+					<td width = '26%'>
+						<center><span id = 'title'>ANUV'S CHESSBOARD</span></center>
+					</td>
+					<td width = '41%'></td>
+					<td widht = '10%'>
+						<center><span id = 'idL'><u>GAME ID</u></span><br/>
+						<span id = 'id'>NONE</span></center>
+					</td>
+					<td>
+						<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id = 'join'>Join&nbsp;Game</button>					
+					</td>
+					<td>
+						<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id = 'new'>New&nbsp;Game</button>					
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id = 'userMenu'>
+			<div id = 'umTableCont'>
+				<table id = 'umTable'>
+					<tr>
+						<td>
+							<div id = 'messagesBox'></div>
+						</td>
+					</tr>
+					<tr>
+						<td height = '40px' bgcolor = '#c4c4c4'>
+							<div id = 'sendBox'>
+								<input type = 'text' id = 'textInput' placeholder = 'Message'/>
+								<button id = 'sendButton' class="mdl-button mdl-js-button mdl-js-ripple-effect">SEND</button>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div id = 'umButton'>
+			<center>
+				<table id = 'umbTable'>
+					<tr>
+						<td>
+							<img id = 'arrowImg' src = './img/left.png' height = '60px'/>
+						</td>
+					</tr>
+				</table>
+			</center>
+		</div>
+		<center>
+			<table id = 'mainTable'>
+				<tr>
+					<td></td>
+					<td>
+						<span id = 'turnLabel'>TURN: </span>
+						<span id = 'turn'>NONE</span>
+					</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td width = '30%'>
+						<img src = 'img/chesspieces/wikipedia/wN.png' height = '90px'><br/>
+						<span>P1 - White</span><br/>
+						<span id = 'marker1'></span>
+					</td>
+					<td width = '40%' id = 'mainTD'>
+						<center><div id="board1" style="width: 400px"></div></center>
+					</td>
+					<td width = '30%'>
+						<img src = 'img/chesspieces/wikipedia/bN.png' height = '90px'><br/>
+						<span>P2 - Black</span><br/>
+						<span id = 'marker2'></span>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id = 'start'>Restart</button>					
+					</td>
+					<td></td>
+				</tr>
+			</table>
+		</center>
+	</body>
+</html>
