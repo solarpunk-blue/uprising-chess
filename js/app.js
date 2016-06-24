@@ -20,8 +20,6 @@ var username;
 var userLoggedIn;
 var curMsg;
 
-var a;
-
 // Initialize Firebase
 var config = {
 	apiKey: "AIzaSyASLIpAxRFqU0nCCVvqFp2DxDFUKA44fAg",
@@ -33,7 +31,7 @@ firebase.initializeApp(config);
 database = firebase.database();
 
 function validateMove(source, target, piece, newPos, oldPos, orientation) {
-	console.log(source + '\n' + target + '\n' + piece + '\n' + newPos + '\n' + oldPos + '\n' + orientation)
+	//console.log(source + '\n' + target + '\n' + piece + '\n' + newPos + '\n' + oldPos + '\n' + orientation)
 	if (piece.substring(0, 1) != turn.substring(0, 1)) return 'snapback';
 	else {
 		if (turn != player) return 'snapback';
@@ -64,13 +62,13 @@ function validateID(newID) {
 }
 
 function sendMessage(uname, msg) {
-	_('textInput').value = '';
-	database.ref(id + '/messages').once('value').then(function (snapshot) {
-		var currMsgNum = snapshot.numChildren() + 1;
-		//database.ref(id + '/messages/' + currMsgNum.toString() + '/username').set(uname);
-		//database.ref(id + '/messages/' + currMsgNum.toString() + '/message').set(msg);
-		database.ref(id + '/messages/' + currMsgNum.toString()).set({ 'username':uname, 'message':msg });
-	});
+	if (_('textInput').value != '') {
+		_('textInput').value = '';
+		database.ref(id + '/messages').once('value').then(function (snapshot) {
+			var currMsgNum = snapshot.numChildren() + 1;
+			database.ref(id + '/messages/' + currMsgNum.toString()).set({ 'username':uname, 'message':msg });
+		});
+	}
 }
 
 function loadGame(newID, snapshot) {
@@ -117,30 +115,17 @@ function loadGame(newID, snapshot) {
 	_('mainTable').style.pointerEvents = 'auto';
 	_('mainTD').style.opacity = 1;
 	database.ref(id + '/messages').on('child_added', function(childSnapshot, prevChildKey) {
-		a = childSnapshot;
 		curMsg++;
 		$('#messagesBox').append("<div class = 'message'><b>" + childSnapshot.val().username + ":</b> " + childSnapshot.val().message + "</div>");
 		_('messagesBox').scrollTop = _('messagesBox').scrollHeight;
 	});
-	/*
-		database.ref(id + '/messages').once('value', function (snapshot) {
-			curMsg = 0;
-			if (snapshot.val() != 0) {
-				snapshot.forEach(function (childSnapshot) {
-					curMsg++;
-					$('#messagesBox').append("<div class = 'message'><b>" + childSnapshot.val().username + ":</b> " + childSnapshot.val().message + "</div>");
-					_('messagesBox').scrollTop = _('messagesBox').scrollHeight;
-				});
-			}
-		});
-	*/
 }
 
 function loadPage() {
 	userMenu = false;
 	userLoggedIn = false;
 	//do user stuff here
-	
+
 	board = ChessBoard('board1', { draggable: true, onDrop: validateMove });
 	var url = document.URL;
 	var newID = url.substr(url.length - 5);
@@ -149,7 +134,7 @@ function loadPage() {
 			if (snapshot.child(newID).exists()) loadGame(newID, snapshot);
 		}
 	});
-	
+
 	$('#start').on('click', function () {
 		board.start();
 		chess = new Chess();
@@ -213,7 +198,7 @@ function loadPage() {
 		var newID = prompt('Enter your game ID', 'Game ID');
 		database.ref().once('value').then(function (snapshot) {
 			if (newID != null) {
-				if (snapshot.child(newID).exists()) { 
+				if (snapshot.child(newID).exists()) {
 					loadGame(newID, snapshot);
 				}
 			}
