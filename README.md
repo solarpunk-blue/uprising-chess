@@ -1,6 +1,6 @@
 #Firebase Chess
 Multiplayer chess room (two players and spectators) using Firebase to store games and messages  
-*Hosted at: [anuv.tk/chessroom.tk](http://anuv.tk/chessroom.tk)*  
+*Hosted at: [anuv.me/chessroom.tk](http://anuv.me/chessroom.tk)*  
   
 Libraries Used  
 &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[jQuery](https://jquery.com/) - v2.2.0  
