@@ -1,3 +1,3 @@
-# chessroom.tk - Pages
-Project website for [firebase chess](https://github.com/anuvgupta/chessroom.tk)  
-*This site simply redirects to [chessroom.tk](http://chessroom.tk)*
+# chessroom.ml - Pages
+Project website for [firebase chess](https://github.com/anuvgupta/chessroom.ml)  
+*This site simply redirects to [chessroom.ml](http://chessroom.ml)*
