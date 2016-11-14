@@ -1,6 +1,7 @@
 # Firebase Chess
 Multiplayer chess room (two players and spectators) using Firebase to store games and messages  
 *Hosted at: [chessroom.ml](http://chessroom.ml)*  
+***Current Version can be tested with [rawgit](https://cdn.rawgit.com/anuvgupta/chessroom.ml/block/www/index.html)***  
 
 Libraries Used  
 &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[jQuery](https://jquery.com/) - v1.12.4  
