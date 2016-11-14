@@ -11,6 +11,11 @@ app
             if (data.action == 'set')
                 block.child('menu/content/panel/id').html(data.id);
         }
+    :info
+        {
+            if (data.text != undefined && data.text !== null && typeof data.text == 'string')
+                block.child('main/chessboard/info/message').html(data.text);
+        }
     :board
         {
             var board = block.child('main/chessboard');

@@ -66,6 +66,13 @@ app = {
         	});
         }
     },
+    updateSpectators: function () {
+        var that = this;
+        this.database.ref(this.id + '/spectators').once('value', function (snapshot) {
+            if (snapshot.exists())
+                that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
+        });
+    },
     joinGame: function (id) {
         if (this.validateID(id)) {
             // node('marker1').innerHTML = '';
@@ -78,6 +85,7 @@ app = {
         }
     },
     loadGame: function (id, snapshot) {
+        var that = this;
         this.id = id;
         this.board.start();
         this.chess = new Chess();
@@ -94,16 +102,16 @@ app = {
             });
             this.database.ref(id + '/state').set('pending');
             this.state = 'pending';
+            this.block.on('info', { text: 'Waiting for Black' });
     		// node('marker1').innerHTML = 'YOU';
-            var that = this;
             this.database.ref(id + '/state').on('value', function (snapshot) {
-                console.log(snapshot.val());
                 if (that.state != 'commenced' && snapshot.val() == 'commenced') {
                     that.state = 'commenced';
                     that.block.on('board', {
                         action: 'show',
                         amount: 'full'
                     });
+                    that.updateSpectators();
                 }
             });
         } else if (game.state == 'pending') {
@@ -115,6 +123,7 @@ app = {
             });
             this.database.ref(id + '/state').set('commenced');
             this.state = 'commenced';
+            that.updateSpectators();
     		// node('marker2').innerHTML = 'YOU';
         } else if (game.state == 'commenced') {
     		this.player = 'spectator';
@@ -125,18 +134,24 @@ app = {
             });
     		this.state = 'commenced';
             // node('marker3').innerHTML = 'SPECTATING';
-            var that = this;
     		this.database.ref(id + '/spectators').once('value', function (snapshot) {
     			var currentSpectators = 1;
-    			if (snapshot.exists()) currentSpectators = snapshot.val() + 1;
+    			if (snapshot.exists()) currentSpectators += snapshot.val();
     			that.database.ref(id + '/spectators').set(currentSpectators);
     			that.username += currentSpectators.toString();
+                that.updateSpectators();
     		});
+            window.addEventListener('beforeunload', function () {
+                that.database.ref(id + '/spectators').once('value', function (snapshot) {
+        			var currentSpectators = -1;
+        			if (snapshot.exists()) currentSpectators += snapshot.val();
+        			that.database.ref(id + '/spectators').set(currentSpectators);
+        		});
+            });
     	} else return 'Invalid State';
     	this.board.position(game.fen);
     	this.chess.load(game.fen);
     	this.updateTurn(this.chess.turn());
-        var that = this;
         this.database.ref(id + '/fen').on('value', function (snapshot) {
     		if (that.state == 'commenced' && that.chess.fen() != snapshot.val()) {
     			that.chess.load(snapshot.val());
@@ -144,7 +159,11 @@ app = {
     			that.updateTurn(that.chess.turn());
     		}
     	});
-    	window.history.pushState({ gameID: id }, 'Chessroom ' + id, id);
+        this.database.ref(id + '/spectators').on('value', function (snapshot) {
+            if (that.state == 'commenced' && snapshot.exists())
+                that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
+        });
+    	window.history.pushState({ gameID: id }, 'chessroom.ml ' + id, id);
     	this.block.on('id', {
             action: 'set',
             id: id
@@ -254,7 +273,7 @@ app = {
 })();
 
 // load blocks
-$(document).ready(function () {
+window.addEventListener('load', function () {
     setTimeout(function () {
         app.block.load(function (block) {
             block.fill(document.body);
@@ -264,7 +283,7 @@ $(document).ready(function () {
             }, 20);
             Block.queries();
             app.load(block.child('main/chessboard/board').id());
-        }, 'app', 'jQuery');
+        }, 'app', true);
     }, 1000);
 });
 
