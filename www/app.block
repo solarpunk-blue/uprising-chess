@@ -1,0 +1,201 @@
+    *
+app
+    css
+        height 100%
+        width 100%
+        margin 0
+        border none
+        opacity 0
+    :id
+        {
+            if (data.action == 'set')
+                block.child('menu/content/panel/id').html(data.id);
+        }
+    :board
+        {
+            var board = block.child('main/chessboard');
+            if (data.action == 'show') {
+                if (data.amount == 'none')
+                    board.css({
+                        opacity: '0.5',
+                        pointerEvents: 'none'
+                    });
+                else if (data.amount == 'partial')
+                    board.css({
+                        opacity: '0.7',
+                        pointerEvents: 'none'
+                    });
+                else if (data.amount == 'full')
+                    board.css({
+                        opacity: '1',
+                        pointerEvents: 'auto'
+                    });
+            }
+        }
+    div menu
+        css
+            position fixed
+            height 65px
+            background-color #EAEAEA
+            border 1px solid #DDD
+            border-width 0 0 1px 0
+            width 100%
+            top 0
+            left 0
+            right 0
+            text-align center
+            -webkit-box-shadow 0 2px 4px #DDD
+            box-shadow 0 2px 4px #DDD
+        div content
+            css
+                position relative
+                height 100%
+                width 100%
+            div logo
+                css
+                    position absolute
+                    left 10px
+                    top 1px
+                    width 60px
+                image rook
+                    height 60px
+                    width 60px
+                    src img/chesspieces/wikipedia/wR.png
+            block title
+                css
+                    position absolute
+                    left 78px
+                    top 3px
+                @query window width > 515
+                    css
+                        width 180px
+                    text
+                        html chessroom
+                @query window width <= 515
+                    css
+                        width 95px
+                    text
+                        html chess
+                @query window width <= 400
+                    css
+                        width 5px
+                    text
+                        html &nbsp;
+                text text
+                    css
+                        color #9D9D9D
+                        font-size 27px
+                        text-transform uppercase
+            div new
+                css
+                    position absolute
+                    right 20px
+                    top 14px
+                @query window width > 630
+                    button
+                        val New Game
+                @query window width <= 630
+                    button
+                        val New
+                mdl-button button
+                    ripple on
+                    css
+                        color #484848
+                    :click
+                        {
+                            app.newGame();
+                        }
+            div join
+                css
+                    position absolute
+                    top 14px
+                @query window width > 630
+                    css
+                        right 141px
+                    button
+                        val Join Game
+                @query window width <= 630
+                    css
+                        right 95px
+                    button
+                        val Join
+                mdl-button button
+                    ripple on
+                    css
+                        color #484848
+                    :click
+                        {
+                            var id = prompt('Enter your Game ID', 'Game ID');
+                            if (id != null && id.trim() != '') app.joinGame(id);
+                        }
+            div panel
+                css
+                    position absolute
+                    right 262px
+                    top 12px
+                    height 100%
+                    text-transform uppercase
+                @query window width > 630
+                    css
+                        right 262px
+                @query window width <= 630
+                    css
+                        right 172px
+                text label
+                    val Game ID
+                    css
+                        text-decoration underline
+                        font-size 13px
+                        display block
+                text id
+                    val NONE
+                    css
+                        text-transform none
+                        font-size 18px
+    div main
+        css
+            position absolute
+            top 65px
+            bottom 0
+            left 0
+            right 0
+        block chessboard
+            div board
+                id board
+                css
+                    height 500px
+                    width 500px
+                    margin 0 auto
+                @query window width > 550
+                    css
+                        height 500px
+                        width 500px
+                    {
+                        setTimeout(function () {
+                            app.board.resize();
+                        }, 100);
+                    }
+                @query window width <= 550
+                    {
+                        var size = window.innerWidth * 0.9;
+                        block.css({
+                            width: size + 'px',
+                            height: size + 'px'
+                        });
+                        app.board.resize();
+                    }
+            div info
+                css
+                    margin-top 15px
+                text message
+                    val join or create a game
+                    css
+                        text-transform uppercase
+                        font-size 20px
+                        color #444
+    {
+        app.block.on('board', {
+            action: 'show',
+            amount: 'none'
+        });
+    }

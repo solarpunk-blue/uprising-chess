@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang = 'en'>
+	<head>
+		<title>chessroom.ml</title>
+		<meta charset = 'utf-8'/>
+        <meta name = 'author' content = 'Anuv Gupta'/>
+        <meta name = 'copyright' content = 'Copyright (c) 2016 Anuv Gupta'/>
+        <meta name = 'viewport' content = 'width=device-width, initial-scale=0.95, maximum-scale=0.95, user-scalable=yes'/>
+		<link rel = 'icon' type = 'image/png' href = 'img/chesspieces/wikipedia/wR.png'/>
+		<link rel = 'stylesheet' type = 'text/css' href = 'js/chessboard-0.3.0.min.css'/>
+		<link rel = 'stylesheet' type = 'text/css' href = 'js/material.min.css'/>
+		<link rel = 'stylesheet' type = 'text/css' href = 'https://fonts.googleapis.com/icon?family=Material+Icons'/>
+		<link rel = 'stylesheet' type = 'text/css' href = 'style.css'/>
+		<!-- chess libraries -->
+		<script type = 'text/javascript' src = 'js/chess.min.js'></script>
+		<script type = 'text/javascript' src = 'js/chessboard-0.3.0.min.js'></script>
+		<!-- UI Libraries -->
+		<script type = 'text/javascript' src = 'js/jquery-1.12.4.min.js'></script>
+		<script type = 'text/javascript' src = 'js/material.min.js'></script>
+		<!-- block.js -->
+		<script type = 'text/javascript' src = 'js/block.js'></script>
+		<!-- Firebase API -->
+		<script type = 'text/javascript' src = 'https://www.gstatic.com/firebasejs/live/3.0/firebase.js'></script>
+		<script type = 'text/javascript' src = 'https://www.gstatic.com/firebasejs/3.0.5/firebase-app.js'></script>
+	  	<script type = 'text/javascript' src = 'https://www.gstatic.com/firebasejs/3.0.5/firebase-auth.js'></script>
+	  	<script type = 'text/javascript' src = 'https://www.gstatic.com/firebasejs/3.0.5/firebase-database.js'></script>
+		<!-- app logic -->
+		<script type = 'text/javascript' src = 'app.js'></script>
+	</head>
+	<body>
+		<!-- chessroom -->
+		<div id = 'loading' style = 'position: absolute; top: 0; left; 0; width: 100%; height: 100%; display: table; text-align: center; opacity: 1; transition: opacity 0.1s ease;'>
+            <div style = 'display: table-cell; vertical-align: middle; margin: 0 auto;'>
+				<img src = 'img/ripple.gif'/>
+				<!-- <br/><br/> -->
+                <!-- <span style = 'font-size: 30px; color: #8A8A8A;'>LOADING</span> -->
+            </div>
+        </div>
+	</body>
+</html>
