@@ -1,4 +1,136 @@
     *
+// chessroom.ml blockfile
+
+// define custom blocks
+!break
+    init
+        {
+            return Block('span').add(Block('br'));
+        }
+    load
+        {
+            data('val', function (val) {
+                for (var i = 1; i < val; i++)
+                    block.add(Block('br'));
+            });
+        }
+!text
+    init
+        {
+            return Block('span');
+        }
+    load
+        {
+            data('val', function (val) {
+                block.node().appendChild(document.createTextNode(val));
+            });
+            data('html', function (html) {
+                block.html(html);
+            });
+        }
+!image
+    init
+        {
+            return Block('div');
+        }
+    load
+        {
+            var src = data('src');
+            var height = data('height');
+            var width = data('width');
+            var alt = data('alt');
+            if (src != null) {
+                block.css('background-image', "url('" + src + "')")
+                    .css('background-repeat', 'no-repeat')
+                    .css('background-size', 'contain')
+                ;
+            }
+            if (height !== null) block.css('height', height);
+            else block.css('height', 'auto');
+            if (width !== null) block.css('width', width);
+            else block.css('width', 'auto');
+            if (alt !== null) block.attribute('title', alt);
+        }
+!mdl-button
+    init
+        {
+            return Block('button')
+                .class('mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect')
+
+                .on('mouseout', function (e, b) {
+                    b.css('box-shadow', '0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)');
+                }).on('mouseover', function (e, b) {
+                    b.css('box-shadow', '0 4px 4px 0 rgba(0,0,0,.14),0 5px 3px -4px rgba(0,0,0,.2),0 3px 7px 0 rgba(0,0,0,.12)');
+                }).on('mouseout')
+                .add('span', 'text')
+            ;
+        }
+    load
+        {
+            data('ripple', function (ripple) {
+                if (ripple == 'off') {
+                    block.node().className = 'mdl-button mdl-js-button mdl-button--raised';
+                    block.html('');
+                    block.add('span', 'text');
+                }
+            });
+            data('val', function () {
+                block.child('text').html(data('val'));
+            });
+            window.componentHandler.upgradeElement(block.node());
+        }
+!space
+    init
+        {
+            return Block('span').html('&nbsp;');
+        }
+    load
+        {
+            data('val', function (val) {
+                for (var i = 1; i < value; i++)
+                    block.node().innerHTML += '&nbsp;';
+            });
+        }
+!card
+    init
+        {
+            return Block('div')
+                .key('shadow', 'right')
+                .css({
+                    height: '230px',
+                    width: '60%',
+                    maxWidth: '300px',
+                    margin: '0 auto',
+                })
+                .add(Block('div', 'card')
+                    .css({
+                        height: '100%',
+                        width: '100%',
+                        border: '1px solid #DDD',
+                        borderRadius: '10px',
+                        backgroundColor: '#EAEAEA',
+                        margin: '0',
+                        cursor: 'pointer',
+                        transition: 'box-shadow 0.26s, margin 0.22s'
+                    }).on('mouseout', function (e, b) {
+                        b.css('box-shadow', '0 0 0 #CCC');
+                        b.css(('margin-' + block.key('shadow')), '0');
+                        b.css('margin-bottom', '0');
+                    }).on('mouseover', function (e, b) {
+                        b.css('box-shadow', (block.key('shadow') == 'left' ? '-' : '') + '1px 3px 5px #CCC');
+                        b.css(('margin-' + block.key('shadow')), '1.5px');
+                        b.css('margin-bottom', '1.5px');
+                    }).on('mouseout')
+                )
+            ;
+        }
+    load
+        {
+            data('shadow', function (shadow) {
+                block.key('shadow', shadow);
+            });
+        }
+// app UI content layer
 app
     css
         height 100%
@@ -13,7 +145,7 @@ app
         }
     :info
         {
-            if (data.text != undefined && data.text !== null && typeof data.text == 'string')
+            if (Block.is.str(data.text))
                 block.child('main/chessboard/info/message').html(data.text);
         }
     :board
@@ -55,7 +187,16 @@ app
             css
                 position relative
                 height 100%
-                width 100%
+                margin 0 auto
+            @query window width > 1800
+                css
+                    width 60%
+            @query window width <= 1800
+                css
+                    width 80%
+            @query window width <= 1600
+                css
+                    width 100%
             div logo
                 css
                     position absolute
@@ -130,7 +271,7 @@ app
                         color #484848
                     :click
                         {
-                            var id = prompt('Enter your Game ID', 'Game ID');
+                            var id = prompt('Enter your Game ID:', 'ID');
                             if (id != null && id.trim() != '') app.joinGame(id);
                         }
             div panel
@@ -178,7 +319,7 @@ app
                     {
                         setTimeout(function () {
                             app.board.resize();
-                        }, 100);
+                        }, 50); // 100
                     }
                 @query window width <= 550
                     {
@@ -198,6 +339,35 @@ app
                         text-transform uppercase
                         font-size 20px
                         color #444
+        block left
+            css
+                position absolute
+                top 0
+                left 0
+            @query window width != 0
+                {
+                    // if (window.innerHeight > window.innerWidth) {
+                    //
+                    // }
+                    block.css('width', (window.innerWidth - 500)/2 + 'px');
+                }
+            card card
+                logo img/chesspieces/wikipedia/wN.png
+                name white
+                shadow left
+        block right
+            css
+                position absolute
+                top 0
+                right 0
+            @query window width != 0
+                {
+                    block.css('width', (window.innerWidth - 500)/2 + 'px');
+                }
+            card card
+                logo img/chesspieces/wikipedia/bN.png
+                name white
+                shadow right
     {
         app.block.on('board', {
             action: 'show',
