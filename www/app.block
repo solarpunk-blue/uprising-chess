@@ -1,4 +1,5 @@
     *
+
 // chessroom.ml blockfile
 
 // define custom blocks
@@ -56,7 +57,6 @@
         {
             return Block('button')
                 .class('mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect')
-
                 .on('mouseout', function (e, b) {
                     b.css('box-shadow', '0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)');
                 }).on('mouseover', function (e, b) {
@@ -87,14 +87,15 @@
     load
         {
             data('val', function (val) {
-                for (var i = 1; i < value; i++)
+                for (var i = 1; i < val; i++)
                     block.node().innerHTML += '&nbsp;';
             });
         }
 !card
     init
         {
-            return Block('div')
+            var block = Block('div');
+            return block
                 .key('shadow', 'right')
                 .css({
                     height: '230px',
@@ -107,29 +108,89 @@
                         height: '100%',
                         width: '100%',
                         border: '1px solid #DDD',
-                        borderRadius: '10px',
-                        backgroundColor: '#EAEAEA',
+                        borderRadius: '8px',
+                        backgroundColor: '#F4F4F4', //#EAEAEA
                         margin: '0',
-                        cursor: 'pointer',
-                        transition: 'box-shadow 0.26s, margin 0.22s'
-                    }).on('mouseout', function (e, b) {
+                        // cursor: 'crosshair',
+                        transition: 'box-shadow 0.20s, margin 0.1s'
+                    })
+                    .add(Block('block', 'content')
+                        .add(Block('image', 'logo')
+                            .css('margin', '0 auto 8px auto')
+                        )
+                        .add(Block('text', 'title')
+                            .css({
+                                fontSize: '23px',
+                                color: '#666',
+                                display: 'block',
+                                textTransform: 'uppercase'
+                            })
+                            .data('waiting')
+                        )
+                        .add(Block('text', 'id')
+                            .css({
+                                fontSize: '14px',
+                                color: '#666',
+                                display: 'block',
+                                marginTop: '1px',
+                                textTransform: 'uppercase'
+                            })
+                            .html('&nbsp;')
+                        )
+                    )
+                    .on('mouseout', function (e, b) {
                         b.css('box-shadow', '0 0 0 #CCC');
-                        b.css(('margin-' + block.key('shadow')), '0');
-                        b.css('margin-bottom', '0');
+                        // b.css(('margin-' + block.key('shadow')), '0');
+                        // b.css('margin-bottom', '0');
                     }).on('mouseover', function (e, b) {
                         b.css('box-shadow', (block.key('shadow') == 'left' ? '-' : '') + '1px 3px 5px #CCC');
-                        b.css(('margin-' + block.key('shadow')), '1.5px');
-                        b.css('margin-bottom', '1.5px');
+                        // b.css(('margin-' + block.key('shadow')), '1px');
+                        // b.css('margin-bottom', '1px');
                     }).on('mouseout')
                 )
+                .on('state', function (e, b, d) {
+                    var name = block.key('name');
+                    if (name == null || name.trim() == '') name = 'waiting';
+                    if (d.action == 'show')
+                        b.child('card/content/logo').data({
+                            height: '80px',
+                            width: '80px',
+                            src: b.key('logo')
+                        });
+                    else if (d.action == 'hide') {
+                        window.b = block.child('card');
+                        b.child('card/content/logo').data({
+                            height: '80px',
+                            width: '80px',
+                            src: 'img/gear.svg'
+                        });
+                        if (name != 'waiting') {
+                            b.child('card/content/id').html('for ' + name);
+                            name = 'waiting';
+                        }
+                    }
+                    b.child('card/content/title').html(name);
+                }).on('state', { action: 'hide' })
+                .on('id', function (e, b, d) {
+                    var text = '';
+                    if (d.set == true) text = '(you)';
+                    b.child('card/content/id').html(text);
+                })
+                .query('window width <= 900', function () {
+                    block.css('display', 'none');
+                })
+                .query('window width > 900', function () {
+                    block.css('display', 'block');
+                })
             ;
         }
     load
         {
-            data('shadow', function (shadow) {
-                block.key('shadow', shadow);
-            });
+            data('shadow', function (shadow) { block.key('shadow', shadow); });
+            data('logo', function (logo) { block.key('logo', logo); });
+            data('name', function (name) { block.key('name', name); });
         }
+
 // app UI content layer
 app
     css
@@ -169,6 +230,31 @@ app
                     });
             }
         }
+    :players
+        {
+            if (Block.is.str(data.white))
+                block.child('main/left/card').on('state', { action: data.white });
+            if (Block.is.str(data.black))
+                block.child('main/right/card').on('state', { action: data.black });
+            if (data.player == 'white')
+                block.child('main/left/card').on('id', { set: true });
+            else if (data.player == 'black')
+                block.child('main/right/card').on('id', { set: true });
+            else if (data.player == 'spect') {
+                // spectator
+            }
+        }
+    :turn
+        {
+            if (data.turn == 'white') {
+                // white
+            } else if (data.turn == 'black') {
+                // black
+            }
+            if (Block.is.str(data.text)) {
+                block.child('main/chessboard/turn/message').html('turn: ' + data.text);
+            }
+        }
     div menu
         css
             position fixed
@@ -190,7 +276,7 @@ app
                 margin 0 auto
             @query window width > 1800
                 css
-                    width 60%
+                    width 70%
             @query window width <= 1800
                 css
                     width 80%
@@ -306,6 +392,15 @@ app
             left 0
             right 0
         block chessboard
+            div turn
+                css
+                    margin-bottom 8px
+                text message
+                    html &nbsp;
+                    css
+                        text-transform uppercase
+                        font-size 20px
+                        color #444
             div board
                 id board
                 css
@@ -366,10 +461,10 @@ app
                 }
             card card
                 logo img/chesspieces/wikipedia/bN.png
-                name white
+                name black
                 shadow right
     {
-        app.block.on('board', {
+        block.on('board', {
             action: 'show',
             amount: 'none'
         });

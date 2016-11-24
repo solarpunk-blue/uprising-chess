@@ -44,8 +44,11 @@ app = {
         if (this.chess.in_checkmate()) str += ' IN CHECKMATE!';
         if (this.chess.in_stalemate()) str += ' IN STALEMATE';
         if (this.chess.in_draw()) str = 'DRAW';
-        // node('turn').innerHTML = str;
         console.log('TURN: ' + str);
+        this.block.on('turn', {
+            turn: this.turn,
+            text: str
+        });
     },
     validateMove: function (source, target, piece, newPos, oldPos, orientation) {
         if (piece.substring(0, 1) != app.turn.substring(0, 1) || app.turn != app.player || app.chess.move({ from: source, to: target }) == null)
@@ -75,8 +78,6 @@ app = {
     },
     joinGame: function (id) {
         if (this.validateID(id)) {
-            // node('marker1').innerHTML = '';
-        	// node('marker2').innerHTML = '';
             var that = this;
             this.database.ref(id).once('value', function (snapshot) {
     			if (snapshot.exists())
@@ -91,25 +92,29 @@ app = {
         this.chess = new Chess();
         var game = snapshot.val();
         this.state = game.state;
-        // node() innerHTML - clear messages and stuff
-
         if (game.state == 'new') {
             this.player = 'white';
             if (!this.userLoggedIn) this.username = 'White';
             this.block.on('board', {
                 action: 'show',
                 amount: 'partial'
+            }).on('players', {
+                white: 'show',
+                black: 'hide',
+                player: 'white'
             });
             this.database.ref(id + '/state').set('pending');
             this.state = 'pending';
             this.block.on('info', { text: 'Waiting for Black' });
-    		// node('marker1').innerHTML = 'YOU';
             this.database.ref(id + '/state').on('value', function (snapshot) {
                 if (that.state != 'commenced' && snapshot.val() == 'commenced') {
                     that.state = 'commenced';
                     that.block.on('board', {
                         action: 'show',
                         amount: 'full'
+                    }).on('players', {
+                        white: 'show',
+                        black: 'show'
                     });
                     that.updateSpectators();
                 }
@@ -120,20 +125,26 @@ app = {
             this.block.on('board', {
                 action: 'show',
                 amount: 'full'
+            }).on('players', {
+                black: 'show',
+                white: 'show',
+                player: 'black'
             });
             this.database.ref(id + '/state').set('commenced');
             this.state = 'commenced';
             that.updateSpectators();
-    		// node('marker2').innerHTML = 'YOU';
         } else if (game.state == 'commenced') {
     		this.player = 'spectator';
     		if (!this.userLoggedIn) this.username = 'Spect';
             this.block.on('board', {
                 action: 'show',
                 amount: 'full'
+            }).on('players', {
+                white: 'show',
+                black: 'show',
+                player: 'spect'
             });
     		this.state = 'commenced';
-            // node('marker3').innerHTML = 'SPECTATING';
     		this.database.ref(id + '/spectators').once('value', function (snapshot) {
     			var currentSpectators = 1;
     			if (snapshot.exists()) currentSpectators += snapshot.val();
@@ -168,12 +179,6 @@ app = {
             action: 'set',
             id: id
         });
-        // update messages
-    	// this.database.ref(id + '/messages').on('child_added', function(childSnapshot, prevChildKey) {
-    	// 	curMsg++;
-    	// 	$('#messagesBox').append("<div class = 'message'><b>" + childSnapshot.val().username + ":</b> " + childSnapshot.val().message + "</div>");
-    	// 	node('messagesBox').scrollTop = node('messagesBox').scrollHeight;
-    	// });
     },
     newGame: function () {
         var that = this;
@@ -207,37 +212,3 @@ window.addEventListener('load', function () {
         }, 'app', true);
     }, 1000);
 });
-
-
-// var userMenu;
-// var curMsg;
-//
-// function sendMessage(uname, msg) {
-// 	if (node('textInput').value != '') {
-// 		node('textInput').value = '';
-// 		database.ref(id + '/messages').once('value').then(function (snapshot) {
-// 			var currMsgNum = snapshot.numChildren() + 1;
-// 			database.ref(id + '/messages/' + currMsgNum.toString()).set({ 'username':uname, 'message':msg });
-// 		});
-// 	}
-// }
-//
-// function loadPage() {
-// 	$('#umButton').click(function () {
-// 		if (userMenu) {
-// 			userMenu = false;
-// 			node('userMenu').style.right = -310;
-// 			node('arrowImg').src = './img/left.png';
-// 		} else {
-// 			userMenu = true;
-// 			node('userMenu').style.right = 0;
-// 			node('arrowImg').src = './img/right.png';
-// 		}
-// 	});
-// 	$('#textInput').keyup(function (e) {
-// 		if (e.keyCode == 13) sendMessage(username, node('textInput').value);
-// 	});
-// 	$('#sendButton').click(function () {
-// 		sendMessage(username, node('textInput').value);
-// 	});
-// }
