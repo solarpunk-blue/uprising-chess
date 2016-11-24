@@ -149,15 +149,17 @@
                     }).on('mouseout')
                 )
                 .on('state', function (e, b, d) {
+                    b.child('card/content/id').html('&nbsp;');
                     var name = block.key('name');
                     if (name == null || name.trim() == '') name = 'waiting';
-                    if (d.action == 'show')
+                    if (d.action == 'show') {
                         b.child('card/content/logo').data({
                             height: '80px',
                             width: '80px',
                             src: b.key('logo')
                         });
-                    else if (d.action == 'hide') {
+                        if (name != app.player) b.child('card/content/logo/id').html('&nbsp;');
+                    } else if (d.action == 'hide') {
                         window.b = block.child('card');
                         b.child('card/content/logo').data({
                             height: '80px',
@@ -172,8 +174,9 @@
                     b.child('card/content/title').html(name);
                 }).on('state', { action: 'hide' })
                 .on('id', function (e, b, d) {
-                    var text = '';
-                    if (d.set == true) text = '(you)';
+                    var text = b.child('card/content/id').html();
+                    if (d.set === true) text = '(you)';
+                    else if (d.set === false) text = '';
                     b.child('card/content/id').html(text);
                 })
                 .query('window width <= 900', function () {
@@ -236,12 +239,17 @@ app
                 block.child('main/left/card').on('state', { action: data.white });
             if (Block.is.str(data.black))
                 block.child('main/right/card').on('state', { action: data.black });
-            if (data.player == 'white')
-                block.child('main/left/card').on('id', { set: true });
-            else if (data.player == 'black')
-                block.child('main/right/card').on('id', { set: true });
-            else if (data.player == 'spect') {
-                // spectator
+            if (data.action != 'clear') {
+                if (data.player == 'white') {
+                    block.child('main/left/card').on('id', { set: true });
+                } else if (data.player == 'black') {
+                    block.child('main/right/card').on('id', { set: true });
+                } else if (data.player == 'spect') {
+                    // spectator
+                }
+            } else {
+                block.child('main/left/card').on('id', { set: false });
+                block.child('main/right/card').on('id', { set: false });
             }
         }
     :turn

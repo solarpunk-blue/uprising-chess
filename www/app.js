@@ -98,7 +98,8 @@ app = {
             this.block.on('board', {
                 action: 'show',
                 amount: 'partial'
-            }).on('players', {
+            })
+            .on('players', {
                 white: 'show',
                 black: 'hide',
                 player: 'white'
@@ -113,7 +114,6 @@ app = {
                         action: 'show',
                         amount: 'full'
                     }).on('players', {
-                        white: 'show',
                         black: 'show'
                     });
                     that.updateSpectators();
@@ -125,7 +125,8 @@ app = {
             this.block.on('board', {
                 action: 'show',
                 amount: 'full'
-            }).on('players', {
+            })
+            .on('players', {
                 black: 'show',
                 white: 'show',
                 player: 'black'
@@ -139,7 +140,8 @@ app = {
             this.block.on('board', {
                 action: 'show',
                 amount: 'full'
-            }).on('players', {
+            })
+            .on('players', {
                 white: 'show',
                 black: 'show',
                 player: 'spect'
