@@ -44,7 +44,6 @@ app = {
         if (this.chess.in_checkmate()) str += ' IN CHECKMATE!';
         if (this.chess.in_stalemate()) str += ' IN STALEMATE';
         if (this.chess.in_draw()) str = 'DRAW';
-        console.log('TURN: ' + str);
         this.block.on('turn', {
             turn: this.turn,
             text: str
@@ -100,9 +99,14 @@ app = {
                 amount: 'partial'
             })
             .on('players', {
-                white: 'show',
-                black: 'hide',
-                player: 'white'
+                white: {
+                    card: 'show',
+                    sub: 'you'
+                },
+                black: {
+                    card: 'waiting',
+                    sub: 'waiting'
+                }
             });
             this.database.ref(id + '/state').set('pending');
             this.state = 'pending';
@@ -114,7 +118,10 @@ app = {
                         action: 'show',
                         amount: 'full'
                     }).on('players', {
-                        black: 'show'
+                        black: {
+                            card: 'show',
+                            sub: false
+                        }
                     });
                     that.updateSpectators();
                 }
@@ -127,9 +134,14 @@ app = {
                 amount: 'full'
             })
             .on('players', {
-                black: 'show',
-                white: 'show',
-                player: 'black'
+                white: {
+                    card: 'show',
+                    sub: false
+                },
+                black: {
+                    card: 'show',
+                    sub: 'you'
+                }
             });
             this.database.ref(id + '/state').set('commenced');
             this.state = 'commenced';
@@ -142,9 +154,14 @@ app = {
                 amount: 'full'
             })
             .on('players', {
-                white: 'show',
-                black: 'show',
-                player: 'spect'
+                white: {
+                    card: 'show',
+                    sub: false
+                },
+                black: {
+                    card: 'show',
+                    sub: false
+                }
             });
     		this.state = 'commenced';
     		this.database.ref(id + '/spectators').once('value', function (snapshot) {
@@ -153,6 +170,9 @@ app = {
     			that.database.ref(id + '/spectators').set(currentSpectators);
     			that.username += currentSpectators.toString();
                 that.updateSpectators();
+                that.block.on('players', {
+                    spect: currentSpectators
+                });
     		});
             window.addEventListener('beforeunload', function () {
                 that.database.ref(id + '/spectators').once('value', function (snapshot) {

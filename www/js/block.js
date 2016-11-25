@@ -725,6 +725,12 @@ Block = function () {
                 .type(type)
                 .mark(marking)
             ;
+            /* type is overwritten!
+                thus, for custom blocks:
+                    one can return Block('tagname') in init, no problem
+                    one cannot return Block('customblocktype') in init, causes block pseudo inheritance issues
+                        instead return Block('div').add(Block('customblocktype')) to access parent block
+            */
         } else element = Block.node(type);
     }
     block.attribute('block', marking);
