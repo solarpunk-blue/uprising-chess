@@ -62,7 +62,9 @@
                 }).on('mouseover', function (e, b) {
                     b.css('box-shadow', '0 4px 4px 0 rgba(0,0,0,.14),0 5px 3px -4px rgba(0,0,0,.2),0 3px 7px 0 rgba(0,0,0,.12)');
                 }).on('mouseout')
-                .add('span', 'text')
+                .add(Block('span', 'text')
+                    .css('font-family', '"Helvetica", "Arial", sans-serif')
+                )
             ;
         }
     load
@@ -344,7 +346,7 @@ app
             block title
                 css
                     position absolute
-                    left 78px
+                    left 70px
                     top 3px
                 @query window width > 515
                     css
@@ -363,7 +365,7 @@ app
                         html &nbsp;
                 text text
                     css
-                        color #9D9D9D
+                        color #909090
                         font-size 27px
                         text-transform uppercase
             div new
@@ -492,12 +494,12 @@ app
                     @query window width >= 420
                         {
                             if (block.key('state') == 'join')
-                                block.html('join or create a game');
+                                block.html('create or join a game');
                         }
                     @query window width < 420
                         {
                             if (block.key('state') == 'join')
-                                block.html('join or<br/>create a game');
+                                block.html('create or<br/>join a game');
                         }
         block left
             css
@@ -593,22 +595,169 @@ app
                 }, 10);
             }
         {
-            block.on('hide');
-            // block.on('show');
+            // block.on('hide');
+            block.on('show');
         }
         div help
             css
                 margin 0 auto
                 border-radius 7px
                 // height 260px
-                height 70%
+                height 75%
                 width 90%
-                max-width 500px
-                background-color #EEE
+                max-width 530px
+                max-height 650px
+                background-color #F2F2F2
+                border-bottom 20px solid #F2F2F2
+                border-top 20px solid #DADADA
+                overflow-y scroll
+                -webkit-overflow-scrolling touch
             :click
                 {
                     event.stopPropagation();
                 }
+            block title
+                div img
+                    image image
+                        src img/chesspieces/wikipedia/wR.png
+                        height 100px
+                        width 100px
+                        css
+                            margin 10px auto
+                        @query window width >= 550
+                            css
+                                height 100px
+                                width 100px
+                        @query window width < 550
+                            css
+                                height 90px
+                                width 90px
+                        @query window width < 450
+                            css
+                                height 75px
+                                width 75px
+                div text
+                    text text
+                        val chessroom
+                        css
+                            text-transform uppercase
+                            font-size 34px
+                            color #777
+                css
+                    width 100%
+                    height auto
+                    text-align center
+                    padding 10px 0 30px 0
+                    background-color #DADADA
+                    border-radius 7px 7px 0 0
+            div content
+                css
+                    width 90%
+                    margin 15px auto
+                    text-align left
+                !title
+                    init
+                        {
+                            return Block('div')
+                                .__add(Block('text', 1)
+                                    .css({
+                                        fontSize: '19px',
+                                        margin: '4px 0',
+                                        color: '#5F5F5F'
+                                    })
+                                )
+                                .css({
+                                    borderBottom: '1px solid #C4C4C4',
+                                    textAlign: 'right',
+                                    padding: '0 20px 0 12px'
+                                })
+                            ;
+                        }
+                    load
+                        {
+                            data('val', function (val) {
+                                block.__child('text').html('').data(val);
+                            });
+                        }
+                !paragraph
+                    init
+                        {
+                            return Block('div')
+                                .__add(Block('text', 1)
+                                    .css({
+                                        fontSize: '15px',
+                                        fontFamily: 'Tahoma, Verdana, "Lucida Grande", "Helvetica", "Arial", sans-serif',
+                                        color: '#666'
+                                    })
+                                )
+                                .css({
+                                    textAlign: 'left',
+                                    padding: '0 12px 0 12px',
+                                    margin: '4px 0 10px 0'
+                                })
+                            ;
+                        }
+                    load
+                        {
+                            data('val', function (val) {
+                                block.__child('text').html('').data(val);
+                            });
+                            data('html', function (html) {
+                                block.__child('text').html(html);
+                            });
+                        }
+                title t1
+                    val chessroom.ml
+                paragraph p1
+                    html
+                        `
+                            <span style = 'font-weight: bold; font-size: 17px;'>chessroom.ml</span> is an online multiplayer chess room.&nbsp;
+                            You can play games of chess in real time with your friends, on any device.&nbsp;
+                            You can even watch the games your friends are playing, but on your own screen!&nbsp;
+                            Instant messaging capabilities are soon to come.
+                        `
+                title t2
+                    val instructions
+                paragraph p2
+                    html
+                        `
+                            Hit <span style = 'font-weight: bold;'>New Game</span> on the top right to begin a new game of chess. You are the White player.&nbsp;
+                            To share the game with a friend, send them the Game ID on the top right or the link to the current page, which also contains your Game ID.&nbsp;
+                            Your friend must join by visiting your link, <a href = '#'>chessroom.ml/gameid</a>, on their own device, or by hitting <span style = 'font-weight: bold;'>Join Game</span>&nbsp;
+                            on the top right and entering your Game ID. When the other player joins, they are the black player.
+                        `
+                title t3
+                    val spectating
+                paragraph p3
+                    html
+                        `
+                            To watch other players' games, join a game that already has both a white and black player.&nbsp;
+                            Go to <a href = '#'>chessroom.ml/gameid</a> or hit <span style = 'font-weight: bold;'>Join Game</span> on the top right and enter the Game ID.&nbsp;
+                            (That game ID is the ID of the game you want to watch). You will be given a spectator ID.
+                        `
+                title t4
+                    val code
+                paragraph p4
+                    html
+                        `
+                            chessroom.ml uses <a href = 'http://firebase.google.com' target = '_blank'>Firebase</a>'s database service to store game data.
+                            The code is located on <a href = 'http://github.com/anuvgupta/chessroom.ml' target = '_blank'>GitHub</a>.<br/>
+                            Libraries used include:<br/>
+                            <ul style = 'margin: 0;'>
+                                <li><a href = 'https://github.com/jhlywa/chess.js' target = '_blank'>chess.js</a> - v0.10.2 - move validation</li>
+                                <li><a href = 'https://github.com/oakmac/chessboardjs' target = '_blank'>chessboard.js</a> - v0.3.0 - chess board UI</li>
+                                <li><a href = 'https://jquery.com' target = '_blank'>jQuery</a> - v1.12.4 - chessboard.js support</li>
+                                <li><a href = 'https://github.com/google/material-design-lite' target = '_blank'>Material Design Lite</a> - v1.1.3 - UI theme and design</li>
+                                <li><a href = 'https://github.com/anuvgupta/block.js' target = '_blank'>block.js</a> - v3.0 - UI development and design</li>
+                            </ul>
+                        `
+                title t5
+                    val author
+                paragraph p5
+                    html
+                        `
+                            The creator of chessroom.ml is <span style = 'font-weight: bold; font-size: 17px;'>Anuv Gupta</span>. You can check out his website at <a href = 'http://anuv.me'>anuv.me</a> and his other projects on his <a href = 'http://github.com/anuvgupta'>GitHub</a>.
+                        `
     {
         block.on('board', {
             action: 'show',

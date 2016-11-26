@@ -1,0 +1,8 @@
+@font-face {
+    font-family: lsansuni;
+    src: url('js/lsansuni.ttf');
+}
+
+* {
+    font-family: "Lucida Sans Unicode", lsansuni, "Lucida Grande", "Helvetica", "Arial", sans-serif;
+}
