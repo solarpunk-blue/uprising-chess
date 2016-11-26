@@ -460,6 +460,7 @@ app
                     height 500px
                     width 500px
                     margin 0 auto
+                    z-index 1000
                 @query window width > 550
                     css
                         height 500px

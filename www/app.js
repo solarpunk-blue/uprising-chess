@@ -57,16 +57,33 @@ app = {
             app.database.ref(app.id + '/fen').set(app.chess.fen());
         }
     },
-    load: function (id) {
-        this.board = ChessBoard(id, { draggable: true, onDrop: this.validateMove });
-        var urlID = window.location.pathname.substring(1);
-        if (urlID.trim() != '' && this.validateID(urlID)) {
-            var that = this;
-            this.database.ref(urlID).once('value', function (snapshot) {
-        		if (snapshot.exists())
-        			that.loadGame(urlID, snapshot);
-        	});
-        }
+    load: function (boardID) {
+        var that = this;
+        this.board = ChessBoard(boardID, { draggable: true, onDrop: this.validateMove });
+        var id = window.location.pathname.substring(1);
+        if (id.trim() != '') {
+            if (this.validateID(id)) {
+                if (this.cookie('id') == id)
+                    this.loadFromCookies();
+                else {
+                    this.database.ref(id).once('value', function (snapshot) {
+            			if (snapshot.exists())
+                            that.loadGame(id, snapshot.val());
+                        else that.reset();
+                	});
+                }
+            } else this.reset();
+        } else this.loadFromCookies();
+    },
+    loadFromCookies: function () {
+        var idCookie = this.cookie('id');
+        var playerCookie = this.cookie('player');
+        if (Block.is.str(idCookie) && Block.is.str(playerCookie))
+            this.joinGame(idCookie, playerCookie);
+    },
+    reset: function () {
+        window.history.pushState({ gameID: '' }, 'chessroom.ml', '/');
+        window.location.reload();
     },
     updateSpectators: function () {
         var that = this;
@@ -269,10 +286,6 @@ window.addEventListener('load', function () {
             }, 20);
             Block.queries();
             app.load(block.key('boardID'));
-            var idCookie = app.cookie('id');
-            var playerCookie = app.cookie('player');
-            if (Block.is.str(idCookie) && Block.is.str(playerCookie))
-                app.joinGame(idCookie, playerCookie);
-        }, 'app', true);
+        }, 'app', 'jQuery');
     }, 1000);
 });
