@@ -1,5 +1,5 @@
-# Firebase Chess
-Multiplayer chess room (two players and spectators) using Firebase to store games and messages  
+# chessroom.ml
+Multiplayer chess room (two players and multiple spectators) using Firebase Database to store games  
 *Hosted at: [chessroom.ml](http://chessroom.ml)*  
 
 Libraries Used  
