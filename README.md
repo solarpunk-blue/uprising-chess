@@ -1,5 +1,5 @@
 # chessroom.ml
-chessroom.ml is an online ultiplayer chess room (two players and multiple spectators) using Firebase's database service to store game data  
+chessroom.ml is an online multiplayer chess room (two players and multiple spectators) using Firebase's database service to store game data  
 *Hosted at: [chessroom.ml](http://chessroom.ml)*  
 
 Libraries Used  
