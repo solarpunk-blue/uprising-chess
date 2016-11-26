@@ -238,7 +238,7 @@ app = {
                 that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
         });
         window.addEventListener('beforeunload', this.disconnect);
-    	// window.history.pushState({ gameID: id }, 'chessroom.ml ' + id, id);
+    	window.history.pushState({ gameID: id }, 'chessroom.ml ' + id, id);
     	this.block.on('id', {
             action: 'set',
             id: id

@@ -595,8 +595,7 @@ app
                 }, 10);
             }
         {
-            // block.on('hide');
-            block.on('show');
+            block.on('hide');
         }
         div help
             css
