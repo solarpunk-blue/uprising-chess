@@ -1,10 +1,21 @@
 # chessroom.ml
-chessroom.ml is an online multiplayer chess room (two players and multiple spectators) using Firebase's database service to store game data  
+chessroom.ml is an online multiplayer chess room. You can play games of chess in real time with your friends, on any device. You can even watch the games your friends are playing, but on your own screen!  
+Instant messaging capabilities are soon to come.  
 *Hosted at: [chessroom.ml](http://chessroom.ml)*  
 
-Libraries Used  
-&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[jQuery](https://jquery.com/) - v1.12.4  
-&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[chess.js](https://github.com/jhlywa/chess.js) - v0.10.2  
-&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[chessboard.js](https://github.com/oakmac/chessboardjs) - v0.3.0  
-&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[material-design-lite](https://github.com/google/material-design-lite) - v1.1.3  
-&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[block.js](https://github.com/anuvgupta/block.js) - v3.0 (also made by me)  
+## instructions
+Visit [chessroom.ml](http://chessroom.ml) to play!  
+Hit **New Game** on the top right to begin a new game of chess. You are the White player.  
+To share the game with a friend, send them the Game ID on the top right or the link to the current page, which also contains your Game ID. Your friend must join by visiting your link, [chessroom.ml/gameid](#), on their own device, or by hitting **Join Game** on the top right and entering your Game ID. When the other player joins, they are the Black player.
+
+## spectating
+To watch other players' games, join a game that already has both a white and black player. Go to [chessroom.ml/gameid](#) or hit **Join Game** on the top right and enter the Game ID. (That game ID is the ID of the game you want to watch). You will be given a spectator ID.
+
+## code
+chessroom.ml uses [Firebase](http://firebase.google.com)'s database service to store game data. The code is located on [GitHub](http://github.com/anuvgupta/chessroom.ml).  
+Libraries Used:  
+&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[chess.js](https://github.com/jhlywa/chess.js) - v0.10.2 - move validation  
+&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[chessboard.js](https://github.com/oakmac/chessboardjs) - v0.3.0 - chess board UI  
+&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[jQuery](https://jquery.com/) - v1.12.4 - chessboard.js support  
+&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[material-design-lite](https://github.com/google/material-design-lite) - v1.1.3 - UI theme and design  
+&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;[block.js](https://github.com/anuvgupta/block.js) - v3.0 - UI development and design - (also made by me)  

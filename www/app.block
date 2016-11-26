@@ -622,7 +622,7 @@ app
                         height 100px
                         width 100px
                         css
-                            margin 10px auto
+                            margin 0 auto 10px auto
                         @query window width >= 550
                             css
                                 height 100px
@@ -642,6 +642,8 @@ app
                             text-transform uppercase
                             font-size 34px
                             color #777
+                    css
+                        margin-bottom 6px
                 css
                     width 100%
                     height auto
@@ -710,9 +712,9 @@ app
                 paragraph p1
                     html
                         `
-                            <span style = 'font-weight: bold; font-size: 17px;'>chessroom.ml</span> is an online multiplayer chess room.&nbsp;
-                            You can play games of chess in real time with your friends, on any device.&nbsp;
-                            You can even watch the games your friends are playing, but on your own screen!&nbsp;
+                            <span style = 'font-weight: bold; font-size: 17px;'>chessroom.ml</span> is an online multiplayer chess room.
+                            You can play games of chess in real time with your friends, on any device.
+                            You can even watch the games your friends are playing, but on your own screen!
                             Instant messaging capabilities are soon to come.
                         `
                 title t2
@@ -720,18 +722,18 @@ app
                 paragraph p2
                     html
                         `
-                            Hit <span style = 'font-weight: bold;'>New Game</span> on the top right to begin a new game of chess. You are the White player.&nbsp;
-                            To share the game with a friend, send them the Game ID on the top right or the link to the current page, which also contains your Game ID.&nbsp;
-                            Your friend must join by visiting your link, <a href = '#'>chessroom.ml/gameid</a>, on their own device, or by hitting <span style = 'font-weight: bold;'>Join Game</span>&nbsp;
-                            on the top right and entering your Game ID. When the other player joins, they are the black player.
+                            Hit <span style = 'font-weight: bold;'>New Game</span> on the top right to begin a new game of chess. You are the White player.
+                            To share the game with a friend, send them the Game ID on the top right or the link to the current page, which also contains your Game ID.
+                            Your friend must join by visiting your link, <a href = '#'>chessroom.ml/gameid</a>, on their own device, or by hitting <span style = 'font-weight: bold;'>Join Game</span>
+                            on the top right and entering your Game ID. When the other player joins, they are the Black player.
                         `
                 title t3
                     val spectating
                 paragraph p3
                     html
                         `
-                            To watch other players' games, join a game that already has both a white and black player.&nbsp;
-                            Go to <a href = '#'>chessroom.ml/gameid</a> or hit <span style = 'font-weight: bold;'>Join Game</span> on the top right and enter the Game ID.&nbsp;
+                            To watch other players' games, join a game that already has both a white and black player.
+                            Go to <a href = '#'>chessroom.ml/gameid</a> or hit <span style = 'font-weight: bold;'>Join Game</span> on the top right and enter the Game ID.
                             (That game ID is the ID of the game you want to watch). You will be given a spectator ID.
                         `
                 title t4
@@ -741,8 +743,8 @@ app
                         `
                             chessroom.ml uses <a href = 'http://firebase.google.com' target = '_blank'>Firebase</a>'s database service to store game data.
                             The code is located on <a href = 'http://github.com/anuvgupta/chessroom.ml' target = '_blank'>GitHub</a>.<br/>
-                            Libraries used include:<br/>
-                            <ul style = 'margin: 0;'>
+                            Libraries Used:<br/>
+                            <ul style = 'margin: 0; line-height: 19px;'>
                                 <li><a href = 'https://github.com/jhlywa/chess.js' target = '_blank'>chess.js</a> - v0.10.2 - move validation</li>
                                 <li><a href = 'https://github.com/oakmac/chessboardjs' target = '_blank'>chessboard.js</a> - v0.3.0 - chess board UI</li>
                                 <li><a href = 'https://jquery.com' target = '_blank'>jQuery</a> - v1.12.4 - chessboard.js support</li>
@@ -755,7 +757,8 @@ app
                 paragraph p5
                     html
                         `
-                            The creator of chessroom.ml is <span style = 'font-weight: bold; font-size: 17px;'>Anuv Gupta</span>. You can check out his website at <a href = 'http://anuv.me'>anuv.me</a> and his other projects on his <a href = 'http://github.com/anuvgupta'>GitHub</a>.
+                            The creator of chessroom.ml is <span style = 'font-weight: bold; font-size: 17px;'>Anuv Gupta</span>.
+                            You can check out his website at <a href = 'http://anuv.me'>anuv.me</a> and his other projects on his <a href = 'http://github.com/anuvgupta'>GitHub</a>.
                         `
     {
         block.on('board', {
