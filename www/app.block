@@ -237,8 +237,11 @@ app
         }
     :info
         {
+            var messblock = block.child('main/chessboard/info/message');
             if (Block.is.str(data.text))
-                block.child('main/chessboard/info/message').html(data.text);
+                messblock.key('state', 'spect').html(data.text);
+            if (Block.is.int(messblock.key('spect')) && messblock.key('spect') != '0' && messblock.key('spect') != 0)
+                messblock.html(messblock.html() + '<br/>spectating id: ' + messblock.key('spect'));
         }
     :board
         {
@@ -274,6 +277,17 @@ app
                     block.child('main/right/card').on('state', { action: data.black.card });
                 if (Block.is.str(data.black.sub) || data.black.sub === false)
                     block.child('main/right/card').on('state', { sub: data.black.sub });
+            }
+            if (Block.is.set(data.spect)) {
+                block.child('main/chessboard/info/message').key('spect', data.spect)
+                block.on('info', {
+                    text: 'Spectators: ' + data.spect
+                });
+            } else if (data.spect == 'null') {
+                block.child('main/chessboard/info/message').key('spect', 'no')
+                block.on('info', {
+                    text: data.text
+                });
             }
         }
     :turn
@@ -437,6 +451,9 @@ app
                         color #444
             div board
                 id board
+                {
+                    app.block.key('boardID', 'board');
+                }
                 css
                     height 500px
                     width 500px
@@ -457,20 +474,31 @@ app
                             width: size + 'px',
                             height: size + 'px'
                         });
-                        app.board.resize();
+                        // app.board.resize();
+                        setTimeout(function () {
+                            app.board.resize();
+                        }, 50);
                     }
             div info
                 css
                     margin-top 15px
                 text message
+                    $state join
+                    $spect no
                     css
                         text-transform uppercase
                         font-size 20px
                         color #444
                     @query window width >= 420
-                        html join or create a game
+                        {
+                            if (block.key('state') == 'join')
+                                block.html('join or create a game');
+                        }
                     @query window width < 420
-                        html join or<br/>create a game
+                        {
+                            if (block.key('state') == 'join')
+                                block.html('join or<br/>create a game');
+                        }
         block left
             css
                 position absolute
