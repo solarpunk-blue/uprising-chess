@@ -82,8 +82,8 @@ app = {
             this.joinGame(idCookie, playerCookie);
     },
     reset: function () {
-        window.history.pushState({ gameID: '' }, 'chessroom.ml', '/');
-        window.location.reload();
+        // window.history.pushState({ gameID: '' }, 'chessroom.ml', '/');
+        // window.location.reload();
     },
     updateSpectators: function () {
         var that = this;

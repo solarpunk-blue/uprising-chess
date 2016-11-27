@@ -533,7 +533,7 @@ app
                 shadow right
     div foot
         css
-            position fixed
+            position absolute
             bottom 0
             left 0
             right 0
@@ -602,7 +602,6 @@ app
             css
                 margin 0 auto
                 border-radius 7px
-                // height 260px
                 height 75%
                 width 90%
                 max-width 530px
@@ -612,6 +611,12 @@ app
                 border-top 20px solid #DADADA
                 overflow-y scroll
                 -webkit-overflow-scrolling touch
+            @query window width != 0
+                {
+                    var height = 0.75 * window.innerHeight;
+                    if (height > 650) height = 650;
+                    block.css('height', height + 'px');
+                }
             :click
                 {
                     event.stopPropagation();
@@ -651,7 +656,6 @@ app
                     text-align center
                     padding 10px 0 30px 0
                     background-color #DADADA
-                    border-radius 7px 7px 0 0
             div content
                 css
                     width 90%
