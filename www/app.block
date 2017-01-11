@@ -326,10 +326,10 @@ app
                 margin 0 auto
             @query window width > 1800
                 css
-                    width 70%
+                    width 95%
             @query window width <= 1800
                 css
-                    width 80%
+                    width 97.5%
             @query window width <= 1600
                 css
                     width 100%
