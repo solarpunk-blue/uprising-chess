@@ -1,6 +1,7 @@
 # chessroom
 Chessroom is an online multiplayer chess room in which you can play games of chess in real time with your friends, on any device. You can even watch the games your friends are playing on your own screen.  
-Instant messaging capabilities are soon to come. Built with Firebase & rebuilt with block.js. Created at HulaLoop/Pythonroom/TechLab.  
+Instant messaging capabilities are soon to come.  
+Built with Firebase & rebuilt with block.js. Created at HulaLoop/Pythonroom/TechLab.  
 *Hosted at: [chessroom.anuv.me](http://chessroom.anuv.me)*  
 
 ## instructions
