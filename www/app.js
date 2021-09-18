@@ -1,4 +1,3 @@
-
 // initialize app
 var app;
 app = {
@@ -14,10 +13,11 @@ app = {
     // initialize firebase
     firebase: (function () {
         window.firebase.initializeApp({
-        	apiKey: "AIzaSyASLIpAxRFqU0nCCVvqFp2DxDFUKA44fAg",
-        	authDomain: "anuvs-chessroom-ba1fc.firebaseapp.com",
-        	databaseURL: "https://anuvs-chessroom-ba1fc.firebaseio.com",
-        	storageBucket: "anuvs-chessroom-ba1fc.appspot.com",
+            apiKey: "",
+            authDomain: "class-warfare-chess.firebaseapp.com",
+            projectId: "class-warfare-chess",
+            storageBucket: "class-warfare-chess.appspot.com",
+            databaseURL: "https://class-warfare-chess-default-rtdb.firebaseio.com"
         });
         return window.firebase;
     })(),
@@ -37,29 +37,52 @@ app = {
         return true;
     },
     updateTurn: function (t) {
-        if (t == 'w') this.turn = 'white';
-        else this.turn = 'black';
+        if (t == 'w') this.turn = 'capitalists';
+        else this.turn = 'workers';
         var str = this.turn.toUpperCase();
         if (this.chess.in_check()) str += ' IN CHECK';
         if (this.chess.in_checkmate()) str += ' IN CHECKMATE!';
         if (this.chess.in_stalemate()) str += ' IN STALEMATE';
-        if (this.chess.in_draw()) str = 'DRAW';
         this.block.on('turn', {
             turn: this.turn,
             text: str
         });
+        this.block.on('info', { text: 'CAPITALISM PERSISTS '+ this.chess.get_move_number() + ' ROUNDS' });
+
     },
-    validateMove: function (source, target, piece, newPos, oldPos, orientation) {
-        if (piece.substring(0, 1) != app.turn.substring(0, 1) || app.turn != app.player || app.chess.move({ from: source, to: target }) == null)
-            return 'snapback';
-        else {
-            app.updateTurn(app.chess.turn());
-            app.database.ref(app.id + '/fen').set(app.chess.fen());
-        }
+    pieceMove: function(move) {
+      var chessMove = app.chess.move({
+              from: move.from,
+              to: move.to
+            });
+
+      if (chessMove !== null) {
+        app.chess.updateFactories()
+        app.updateTurn(app.chess.turn());
+        app.database.ref(app.id + '/fen').set(app.chess.fen());
+        app.database.ref(app.id + '/true_fen').set(app.chess.true_fen());
+      }
+
+      return app.chess.fen();
+    },
+    pieceSelected: function(notationSquare) {
+      var i,
+        movesNotation,
+        movesPosition = [];
+      movesNotation = app.chess.moves({square: notationSquare, verbose: true});
+      for (i = 0; i < movesNotation.length; i++) {
+        movesPosition.push(ChessUtils.convertNotationSquareToIndex(movesNotation[i].to));
+      }
+      return movesPosition;
     },
     load: function (boardID) {
         var that = this;
-        this.board = ChessBoard(boardID, { draggable: true, onDrop: this.validateMove });
+        this.board = new Chessboard(boardID, {position: 'pppppppp/8/8/RNB1QBNR/RNBQKBNR/8/8/pppppppp w - - 0 1',
+                                  eventHandlers: {
+                                    onPieceSelected: this.pieceSelected,
+                                    onMove: this.pieceMove
+                                  }
+                                });
         var id = window.location.pathname.substring(1);
         if (id.trim() != '') {
             if (this.validateID(id)) {
@@ -137,6 +160,9 @@ app = {
         }
     },
     loadGame: function (id, game, player) {
+        if (game.true_fen == null){
+            game.true_fen = game.fen
+        }
         var that = this;
         this.disconnect();
         this.id = id;
@@ -152,7 +178,7 @@ app = {
         }
         if (game.state == 'new') {
             this.player = 'white';
-            if (!this.userLoggedIn) this.username = 'White';
+            if (!this.userLoggedIn) this.username = 'Capitalists';
             this.block.on('board', {
                 action: 'show',
                 amount: 'partial'
@@ -184,7 +210,7 @@ app = {
             else {
                 this.database.ref(id + '/state').set('pending');
                 this.state = 'pending';
-                this.block.on('info', { text: 'Waiting for Black' });
+                this.block.on('info', { text: 'Waiting for Workers' });
                 this.database.ref(id + '/state').on('value', function (snapshot) {
                     if (that.state != 'commenced' && snapshot.val() == 'commenced')
                         load();
@@ -192,7 +218,7 @@ app = {
             }
         } else if (game.state == 'pending') {
             this.player = 'black';
-    		if (!this.userLoggedIn) this.username = 'Black';
+    		if (!this.userLoggedIn) this.username = 'Workers';
             this.block.on('board', {
                 action: 'show',
                 amount: 'full'
@@ -242,7 +268,8 @@ app = {
     	} else return 'Invalid State';
     	this.board.position(game.fen);
     	this.chess.load(game.fen);
-    	this.updateTurn(this.chess.turn());
+        this.chess.load_true(game.fen);
+        this.updateTurn(this.chess.turn());
         this.database.ref(id + '/fen').on('value', function (snapshot) {
     		if (that.state == 'commenced' && that.chess.fen() != snapshot.val()) {
     			that.chess.load(snapshot.val());
@@ -250,12 +277,17 @@ app = {
     			that.updateTurn(that.chess.turn());
     		}
     	});
+        this.database.ref(id + '/true_fen').on('value', function (snapshot) {
+            if (that.state == 'commenced' && snapshot.val() != null && that.chess.true_fen() != snapshot.val()) {
+                that.chess.load_true(snapshot.val());
+            }
+        });
         this.database.ref(id + '/spectators').on('value', function (snapshot) {
             if (that.state == 'commenced' && snapshot.exists())
                 that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
         });
         window.addEventListener('beforeunload', this.disconnect);
-    	window.history.pushState({ gameID: id }, 'chessroom.ml ' + id, id);
+    	window.history.pushState({ gameID: id }, 'Class Warfare Chess ' + id, id);
     	this.block.on('id', {
             action: 'set',
             id: id

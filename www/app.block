@@ -352,7 +352,7 @@ app
                     css
                         width 180px
                     text
-                        html chessroom
+                        html Class Warfare Chess
                 @query window width <= 515
                     css
                         width 95px
@@ -515,8 +515,7 @@ app
                     block.css('width', (window.innerWidth - 500)/2 + 'px');
                 }
             card card
-                logo img/chesspieces/wikipedia/wN.png
-                name white
+                name capitalists
                 shadow left
         block right
             css
@@ -528,8 +527,7 @@ app
                     block.css('width', (window.innerWidth - 500)/2 + 'px');
                 }
             card card
-                logo img/chesspieces/wikipedia/bN.png
-                name black
+                name workers
                 shadow right
     div foot
         css
@@ -644,7 +642,7 @@ app
                                 width 75px
                 div text
                     text text
-                        val chessroom
+                        val Class Warfare Chess
                         css
                             text-transform uppercase
                             font-size 34px
@@ -721,7 +719,7 @@ app
                                 });
                             }
                     title t1
-                        val chessroom.ml
+                        val Class Warfare Chess
                     paragraph p1
                         html
                             `
