@@ -13,7 +13,7 @@ app = {
     // initialize firebase
     firebase: (function () {
         window.firebase.initializeApp({
-            apiKey: "",
+            apiKey: "AIzaSyA9p387gzJaMguzavE4yFo7rD7QoyOh_2E",
             authDomain: "class-warfare-chess.firebaseapp.com",
             projectId: "class-warfare-chess",
             storageBucket: "class-warfare-chess.appspot.com",
@@ -37,18 +37,20 @@ app = {
         return true;
     },
     updateTurn: function (t) {
-        if (t == 'w') this.turn = 'capitalists';
-        else this.turn = 'workers';
-        var str = this.turn.toUpperCase();
-        if (this.chess.in_check()) str += ' IN CHECK';
-        if (this.chess.in_checkmate()) str += ' IN CHECKMATE!';
-        if (this.chess.in_stalemate()) str += ' IN STALEMATE';
+        if (t == 'w') this.turn = 'white';
+        else this.turn = 'black';
+        if (t == 'w') cool_turn = 'white';
+        else cool_turn = 'black';
+        var str = cool_turn.toUpperCase();
+        if (this.chess.end_game()) {
+            alert('GAME OVER, CAPITALISM DEFEATED! FINAL SCORE '+ 'CAPITALIST: ' + this.chess.get_cap_score() + ', WORKER: ' + this.chess.get_work_score())
+            str = 'GAME OVER, CAPITALISM DEFEATED!'
+        }
         this.block.on('turn', {
             turn: this.turn,
             text: str
         });
-        this.block.on('info', { text: 'CAPITALISM PERSISTS '+ this.chess.get_move_number() + ' ROUNDS' });
-
+        this.block.on('info', { text: 'CAPITALIST SCORE: ' + this.chess.get_cap_score() + ', WORKER SCORE: ' + this.chess.get_work_score()});
     },
     pieceMove: function(move) {
       var chessMove = app.chess.move({
@@ -59,6 +61,8 @@ app = {
       if (chessMove !== null) {
         app.chess.updateFactories()
         app.updateTurn(app.chess.turn());
+        app.database.ref(app.id + '/cap_score').set(app.chess.get_cap_score());
+        app.database.ref(app.id + '/work_score').set(app.chess.get_work_score());
         app.database.ref(app.id + '/fen').set(app.chess.fen());
         app.database.ref(app.id + '/true_fen').set(app.chess.true_fen());
       }
@@ -66,6 +70,9 @@ app = {
       return app.chess.fen();
     },
     pieceSelected: function(notationSquare) {
+      if (app.player.substring(0, 1) != app.chess.turn().substring(0, 1)){
+        return null;
+      }
       var i,
         movesNotation,
         movesPosition = [];
@@ -162,6 +169,8 @@ app = {
     loadGame: function (id, game, player) {
         if (game.true_fen == null){
             game.true_fen = game.fen
+            game.cap_score = 0
+            game.work_score = 0
         }
         var that = this;
         this.disconnect();
@@ -204,7 +213,6 @@ app = {
                         sub: false
                     }
                 });
-                that.updateSpectators();
             };
             if (player == 'white') load();
             else {
@@ -236,7 +244,6 @@ app = {
             });
             this.database.ref(id + '/state').set('commenced');
             this.state = 'commenced';
-            this.updateSpectators();
         } else if (game.state == 'commenced') {
     		this.player = 'spectator';
     		if (!this.userLoggedIn) this.username = 'Spect';
@@ -260,7 +267,6 @@ app = {
     			if (snapshot.exists()) currentSpectators += snapshot.val();
     			that.database.ref(id + '/spectators').set(currentSpectators);
     			that.username += currentSpectators.toString();
-                that.updateSpectators();
                 that.block.on('players', {
                     spect: currentSpectators
                 });
@@ -268,7 +274,9 @@ app = {
     	} else return 'Invalid State';
     	this.board.position(game.fen);
     	this.chess.load(game.fen);
-        this.chess.load_true(game.fen);
+        this.chess.load_true(game.true_fen);
+        this.chess.set_cap_score(game.cap_score);
+        this.chess.work_score = game.work_score;
         this.updateTurn(this.chess.turn());
         this.database.ref(id + '/fen').on('value', function (snapshot) {
     		if (that.state == 'commenced' && that.chess.fen() != snapshot.val()) {
@@ -277,14 +285,22 @@ app = {
     			that.updateTurn(that.chess.turn());
     		}
     	});
+        this.database.ref(id + '/cap_score').on('value', function (snapshot) {
+            if (that.state == 'commenced' && that.chess.get_cap_score() != snapshot.val()) {
+                that.chess.set_cap_score(snapshot.val());
+                that.updateTurn(that.chess.turn());
+            }
+        });
+        this.database.ref(id + '/work_score').on('value', function (snapshot) {
+            if (that.state == 'commenced' && that.chess.get_work_score() != snapshot.val()) {
+                that.chess.set_work_score(snapshot.val());
+                that.updateTurn(that.chess.turn());
+            }
+        });
         this.database.ref(id + '/true_fen').on('value', function (snapshot) {
             if (that.state == 'commenced' && snapshot.val() != null && that.chess.true_fen() != snapshot.val()) {
                 that.chess.load_true(snapshot.val());
             }
-        });
-        this.database.ref(id + '/spectators').on('value', function (snapshot) {
-            if (that.state == 'commenced' && snapshot.exists())
-                that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
         });
         window.addEventListener('beforeunload', this.disconnect);
     	window.history.pushState({ gameID: id }, 'Class Warfare Chess ' + id, id);

@@ -41,13 +41,14 @@ var Chess = function (fen) {
   var SYMBOLS = 'pnbrqkPNBRQK'
 
   var DEFAULT_POSITION =
-    'pppppppp/8/8/RNB1QBNR/RNBQKBNR/8/8/pppppppp w - - 0 1'
+    'pppppppp/8/8/RNB1QBNR/RNBQKBNR/8/8/pppppppp b - - 0 1'
 
   var TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
 
   var PAWN_OFFSETS = {
     t: [16, 32, 17, 15],
     b: [-16, -32, -17, -15],
+    m: [16, 17, 15, -16, -17, -15, 1, -1],
   }
 
   var PIECE_OFFSETS = {
@@ -158,6 +159,8 @@ var Chess = function (fen) {
   var ep_square = EMPTY
   var half_moves = 0
   var move_number = 1
+  var cap_score = 0
+  var work_score = 0
   var history = []
   var header = {}
   var comments = {}
@@ -190,25 +193,6 @@ var Chess = function (fen) {
     update_setup(generate_fen())
   }
 
-  function prune_comments() {
-    var reversed_history = []
-    var current_comments = {}
-    var copy_comment = function (fen) {
-      if (fen in comments) {
-        current_comments[fen] = comments[fen]
-      }
-    }
-    while (history.length > 0) {
-      reversed_history.push(undo_move())
-    }
-    copy_comment(generate_fen())
-    while (reversed_history.length > 0) {
-      make_move(reversed_history.pop())
-      copy_comment(generate_fen())
-    }
-    comments = current_comments
-  }
-
   function reset() {
     load(DEFAULT_POSITION)
   }
@@ -216,16 +200,16 @@ var Chess = function (fen) {
   function updateFactories(){
     for (var i = 0; i <= 7; i++) {
       if (board[i] == null | board[112+i] == null) {
+        work_score++
         for (var j = 0; j <= 7; j++){
           if (board[i+16*j] != null && board[i+16*j].color == 'w' && board[i+16*j].type != KING){
             board[i+16*j].type = PAWN
           }
         }
       } else {
+        cap_score++
         for (var j = 0; j <= 7; j++){
           if (board[i+16*j] != null && board[i+16*j].color == 'w' && board[i+16*j].type == PAWN){
-            console.log(board)
-            console.log(true_board)
             board[i+16*j].type = true_board[i+16*j].type
           }
         }
@@ -644,17 +628,7 @@ var Chess = function (fen) {
   function generate_moves(options) {
     function add_move(board, moves, from, to, flags) {
       /* if pawn promotion */
-      if (
-        board[from].type === PAWN &&
-        (rank(to) === RANK_8 || rank(to) === RANK_1)
-      ) {
-        var pieces = [QUEEN, ROOK, BISHOP, KNIGHT]
-        for (var i = 0, len = pieces.length; i < len; i++) {
-          moves.push(build_move(board, from, to, flags, pieces[i]))
-        }
-      } else {
-        moves.push(build_move(board, from, to, flags))
-      }
+      moves.push(build_move(board, from, to, flags))
     }
 
     var moves = []
@@ -704,31 +678,49 @@ var Chess = function (fen) {
 
       if (piece.type === PAWN && (piece_type === true || piece_type === PAWN)) {
         /* single square, non-capturing */
-        which_pawn = 'b'
-        if ((i < 60 && piece.color == 'b') | (i > 60 && piece.color == 'w')){
-          which_pawn = 't'
-        }
-        var square = i + PAWN_OFFSETS[which_pawn][0]
-        if (board[square] == null) {
-          add_move(board, moves, i, square, BITS.NORMAL)
-          /* double square */
-          // var square = i + PAWN_OFFSETS[us][1]
-          // if (second_rank[us] === rank(i) && board[square] == null) {
-          //   add_move(board, moves, i, square, BITS.BIG_PAWN)
-          // }
-        }
+        if ((i > 40 && i < 72 && piece.color == 'b') ){
+          which_pawn = 'm'
+          for (j = 0; j < 8; j++) {
+            var square = i + PAWN_OFFSETS[which_pawn][j]
+            console.log(square)
+            if (square & 0x88) continue
 
-        /* pawn captures */
-        for (j = 2; j < 4; j++) {
-          var square = i + PAWN_OFFSETS[which_pawn][j]
-          if (square & 0x88) continue
+            if (board[square] != null && board[square].color === them) {
+              add_move(board, moves, i, square, BITS.CAPTURE)
+            } else {
+              add_move(board, moves, i, square, BITS.NORMAL)
+            }
+          }
+        } else {
+          which_pawn = 'b'
+          if ((i < 40 && piece.color == 'b') | (i > 60 && piece.color == 'w')){
+            which_pawn = 't'
+          }
+          var square = i + PAWN_OFFSETS[which_pawn][0]
+          if (board[square] == null) {
+            add_move(board, moves, i, square, BITS.NORMAL)
+            /* double square */
+            // var square = i + PAWN_OFFSETS[us][1]
+            // if (second_rank[us] === rank(i) && board[square] == null) {
+            //   add_move(board, moves, i, square, BITS.BIG_PAWN)
+            // }
+          }
 
-          if (board[square] != null && board[square].color === them) {
-            add_move(board, moves, i, square, BITS.CAPTURE)
-          } else if (square === ep_square) {
-            add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
+          /* pawn captures */
+          for (j = 2; j < 4; j++) {
+            var square = i + PAWN_OFFSETS[which_pawn][j]
+            if (square & 0x88) continue
+
+            if (board[square] != null && board[square].color === them) {
+              add_move(board, moves, i, square, BITS.CAPTURE)
+            } else if (square === ep_square) {
+              add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
+            }
           }
         }
+
+
+
       } else if (piece_type === true || piece_type === piece.type) {
         for (var j = 0, len = PIECE_OFFSETS[piece.type].length; j < len; j++) {
           var offset = PIECE_OFFSETS[piece.type][j]
@@ -737,6 +729,8 @@ var Chess = function (fen) {
           while (true) {
             square += offset
             if (square & 0x88) break
+
+            if (piece.type === 'k' && (square < 40 || square > 72)) break
 
             if (board[square] == null) {
               add_move(board, moves, i, square, BITS.NORMAL)
@@ -777,45 +771,7 @@ var Chess = function (fen) {
    * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
    * 4. ... Ne7 is technically the valid SAN
    */
-  function move_to_san(move, moves) {
-    var output = ''
 
-    if (move.flags & BITS.KSIDE_CASTLE) {
-      output = 'O-O'
-    } else if (move.flags & BITS.QSIDE_CASTLE) {
-      output = 'O-O-O'
-    } else {
-      if (move.piece !== PAWN) {
-        var disambiguator = get_disambiguator(move, moves)
-        output += move.piece.toUpperCase() + disambiguator
-      }
-
-      if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
-        if (move.piece === PAWN) {
-          output += algebraic(move.from)[0]
-        }
-        output += 'x'
-      }
-
-      output += algebraic(move.to)
-
-      if (move.flags & BITS.PROMOTION) {
-        output += '=' + move.promotion.toUpperCase()
-      }
-    }
-
-    make_move(move)
-    if (in_check()) {
-      if (in_checkmate()) {
-        output += '#'
-      } else {
-        output += '+'
-      }
-    }
-    undo_move()
-
-    return output
-  }
   // parses all of the decorators out of a SAN string
   function stripped_san(move) {
     return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
@@ -870,6 +826,10 @@ var Chess = function (fen) {
 
   function king_attacked(color) {
     return attacked(swap_color(color), kings[color])
+  }
+
+  function game_over(){
+    return kings[WHITE]<0
   }
 
   function in_check() {
@@ -934,41 +894,7 @@ var Chess = function (fen) {
     return false
   }
 
-  function in_threefold_repetition() {
-    /* TODO: while this function is fine for casual use, a better
-     * implementation would use a Zobrist key (instead of FEN). the
-     * Zobrist key would be maintained in the make_move/undo_move functions,
-     * avoiding the costly that we do below.
-     */
-    var moves = []
-    var positions = {}
-    var repetition = false
 
-    while (true) {
-      var move = undo_move()
-      if (!move) break
-      moves.push(move)
-    }
-
-    while (true) {
-      /* remove the last two fields in the FEN string, they're not needed
-       * when checking for draw by rep */
-      var fen = generate_fen().split(' ').slice(0, 4).join(' ')
-
-      /* has the position occurred three or move times */
-      positions[fen] = fen in positions ? positions[fen] + 1 : 1
-      if (positions[fen] >= 3) {
-        repetition = true
-      }
-
-      if (!moves.length) {
-        break
-      }
-      make_move(moves.pop())
-    }
-
-    return repetition
-  }
 
   function push(move) {
     history.push({
@@ -987,7 +913,6 @@ var Chess = function (fen) {
     var them = swap_color(us)
     push(move)
 
-    console.log(move)
 
     if (board[move.to] != null && board[move.to].type == PAWN && board[move.to].color == 'b'){
       if (board[move.to % 16] == null){
@@ -1023,55 +948,7 @@ var Chess = function (fen) {
     turn = swap_color(turn)
   }
 
-  function undo_move() {
-    var old = history.pop()
-    if (old == null) {
-      return null
-    }
 
-    var move = old.move
-    kings = old.kings
-    turn = old.turn
-    castling = old.castling
-    ep_square = old.ep_square
-    half_moves = old.half_moves
-    move_number = old.move_number
-
-    var us = turn
-    var them = swap_color(turn)
-
-    board[move.from] = board[move.to]
-    board[move.from].type = move.piece // to undo any promotions
-    board[move.to] = null
-
-    if (move.flags & BITS.CAPTURE) {
-      board[move.to] = { type: move.captured, color: them }
-    } else if (move.flags & BITS.EP_CAPTURE) {
-      var index
-      if (us === BLACK) {
-        index = move.to - 16
-      } else {
-        index = move.to + 16
-      }
-      board[index] = { type: PAWN, color: them }
-    }
-
-    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-      var castling_to, castling_from
-      if (move.flags & BITS.KSIDE_CASTLE) {
-        castling_to = move.to + 1
-        castling_from = move.to - 1
-      } else if (move.flags & BITS.QSIDE_CASTLE) {
-        castling_to = move.to - 2
-        castling_from = move.to + 1
-      }
-
-      board[castling_to] = board[castling_from]
-      board[castling_from] = null
-    }
-
-    return move
-  }
 
   /* this function is used to uniquely identify ambiguous moves */
   function get_disambiguator(move, moves) {
@@ -1296,7 +1173,6 @@ var Chess = function (fen) {
   /* pretty = external move object */
   function make_pretty(ugly_move) {
     var move = clone(ugly_move)
-    move.san = move_to_san(move, generate_moves({ legal: true }))
     move.to = algebraic(move.to)
     move.from = algebraic(move.from)
 
@@ -1330,29 +1206,6 @@ var Chess = function (fen) {
     return str.replace(/^\s+|\s+$/g, '')
   }
 
-  /*****************************************************************************
-   * DEBUGGING UTILITIES
-   ****************************************************************************/
-  function perft(depth) {
-    var moves = generate_moves({ legal: false })
-    var nodes = 0
-    var color = turn
-
-    for (var i = 0, len = moves.length; i < len; i++) {
-      make_move(moves[i])
-      if (!king_attacked(color)) {
-        if (depth - 1 > 0) {
-          var child_nodes = perft(depth - 1)
-          nodes += child_nodes
-        } else {
-          nodes++
-        }
-      }
-      undo_move()
-    }
-
-    return nodes
-  }
 
   return {
     /***************************************************************************
@@ -1422,7 +1275,7 @@ var Chess = function (fen) {
           moves.push(make_pretty(ugly_moves[i]))
         } else {
           moves.push(
-            move_to_san(ugly_moves[i], generate_moves({ legal: true }))
+            // move_to_san(ugly_moves[i], generate_moves({ legal: true }))
           )
         }
       }
@@ -1432,6 +1285,10 @@ var Chess = function (fen) {
 
     in_check: function () {
       return in_check()
+    },
+
+    end_game: function () {
+      return game_over()
     },
 
     in_checkmate: function () {
@@ -1446,17 +1303,12 @@ var Chess = function (fen) {
       return insufficient_material()
     },
 
-    in_threefold_repetition: function () {
-      return in_threefold_repetition()
-    },
-
     game_over: function () {
       return (
         half_moves >= 100 ||
         in_checkmate() ||
         in_stalemate() ||
-        insufficient_material() ||
-        in_threefold_repetition()
+        insufficient_material()
       )
     },
 
@@ -1493,158 +1345,6 @@ var Chess = function (fen) {
     },
     updateFactories: function (){
       updateFactories()
-    },
-
-    pgn: function (options) {
-      /* using the specification from http://www.chessclub.com/help/PGN-spec
-       * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
-       */
-      var newline =
-        typeof options === 'object' && typeof options.newline_char === 'string'
-          ? options.newline_char
-          : '\n'
-      var max_width =
-        typeof options === 'object' && typeof options.max_width === 'number'
-          ? options.max_width
-          : 0
-      var result = []
-      var header_exists = false
-
-      /* add the PGN header headerrmation */
-      for (var i in header) {
-        /* TODO: order of enumerated properties in header object is not
-         * guaranteed, see ECMA-262 spec (section 12.6.4)
-         */
-        result.push('[' + i + ' "' + header[i] + '"]' + newline)
-        header_exists = true
-      }
-
-      if (header_exists && history.length) {
-        result.push(newline)
-      }
-
-      var append_comment = function (move_string) {
-        var comment = comments[generate_fen()]
-        if (typeof comment !== 'undefined') {
-          var delimiter = move_string.length > 0 ? ' ' : ''
-          move_string = `${move_string}${delimiter}{${comment}}`
-        }
-        return move_string
-      }
-
-      /* pop all of history onto reversed_history */
-      var reversed_history = []
-      while (history.length > 0) {
-        reversed_history.push(undo_move())
-      }
-
-      var moves = []
-      var move_string = ''
-
-      /* special case of a commented starting position with no moves */
-      if (reversed_history.length === 0) {
-        moves.push(append_comment(''))
-      }
-
-      /* build the list of moves.  a move_string looks like: "3. e3 e6" */
-      while (reversed_history.length > 0) {
-        move_string = append_comment(move_string)
-        var move = reversed_history.pop()
-
-        /* if the position started with black to move, start PGN with 1. ... */
-        if (!history.length && move.color === 'b') {
-          move_string = move_number + '. ...'
-        } else if (move.color === 'w') {
-          /* store the previous generated move_string if we have one */
-          if (move_string.length) {
-            moves.push(move_string)
-          }
-          move_string = move_number + '.'
-        }
-
-        move_string =
-          move_string +
-          ' ' +
-          move_to_san(move, generate_moves({ legal: true }))
-        make_move(move)
-      }
-
-      /* are there any other leftover moves? */
-      if (move_string.length) {
-        moves.push(append_comment(move_string))
-      }
-
-      /* is there a result? */
-      if (typeof header.Result !== 'undefined') {
-        moves.push(header.Result)
-      }
-
-      /* history should be back to what it was before we started generating PGN,
-       * so join together moves
-       */
-      if (max_width === 0) {
-        return result.join('') + moves.join(' ')
-      }
-
-      var strip = function () {
-        if (result.length > 0 && result[result.length - 1] === ' ') {
-          result.pop()
-          return true
-        }
-        return false
-      }
-
-      /* NB: this does not preserve comment whitespace. */
-      var wrap_comment = function (width, move) {
-        for (var token of move.split(' ')) {
-          if (!token) {
-            continue
-          }
-          if (width + token.length > max_width) {
-            while (strip()) {
-              width--
-            }
-            result.push(newline)
-            width = 0
-          }
-          result.push(token)
-          width += token.length
-          result.push(' ')
-          width++
-        }
-        if (strip()) {
-          width--
-        }
-        return width
-      }
-
-      /* wrap the PGN output at max_width */
-      var current_width = 0
-      for (var i = 0; i < moves.length; i++) {
-        if (current_width + moves[i].length > max_width) {
-          if (moves[i].includes('{')) {
-            current_width = wrap_comment(current_width, moves[i])
-            continue
-          }
-        }
-        /* if the current move will push past max_width */
-        if (current_width + moves[i].length > max_width && i !== 0) {
-          /* don't end the line with whitespace */
-          if (result[result.length - 1] === ' ') {
-            result.pop()
-          }
-
-          result.push(newline)
-          current_width = 0
-        } else if (i !== 0) {
-          result.push(' ')
-          current_width++
-        }
-        result.push(moves[i])
-        current_width += moves[i].length
-      }
-
-      return result.join('')
     },
 
     load_pgn: function (pgn, options) {
@@ -1852,8 +1552,24 @@ var Chess = function (fen) {
       return turn
     },
 
-    get_move_number() {
+    get_move_number: function() {
       return move_number
+    },
+
+    get_cap_score: function() {
+      return cap_score
+    },
+
+    get_work_score: function() {
+      return work_score
+    },
+
+    set_cap_score: function(v) {
+      cap_score = v
+    },
+
+    set_work_score: function(v) {
+      work_score = v
     },
 
     move: function (move, options) {
@@ -1910,11 +1626,6 @@ var Chess = function (fen) {
       return pretty_move
     },
 
-    undo: function () {
-      var move = undo_move()
-      return move ? make_pretty(move) : null
-    },
-
     clear: function () {
       return clear()
     },
@@ -1942,31 +1653,6 @@ var Chess = function (fen) {
       }
 
       return null
-    },
-
-    history: function (options) {
-      var reversed_history = []
-      var move_history = []
-      var verbose =
-        typeof options !== 'undefined' &&
-        'verbose' in options &&
-        options.verbose
-
-      while (history.length > 0) {
-        reversed_history.push(undo_move())
-      }
-
-      while (reversed_history.length > 0) {
-        var move = reversed_history.pop()
-        if (verbose) {
-          move_history.push(make_pretty(move))
-        } else {
-          move_history.push(move_to_san(move, generate_moves({ legal: true })))
-        }
-        make_move(move)
-      }
-
-      return move_history
     },
 
     get_comment: function () {
