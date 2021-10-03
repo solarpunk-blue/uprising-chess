@@ -441,7 +441,10 @@ app
                 css
                     margin-bottom 8px
                 text message
-                    html &nbsp;
+                    html
+                        `
+                            Waiting for players
+                        `
                     css
                         text-transform uppercase
                         font-size 20px
