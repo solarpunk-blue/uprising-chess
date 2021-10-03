@@ -352,7 +352,7 @@ app
                     css
                         width 95px
                     text
-                        html chess
+                        html CWC
                 @query window width <= 400
                     css
                         width 5px
@@ -502,11 +502,9 @@ app
                 position absolute
                 top 0
                 left 0
+                width 0
             @query window width != 0
                 {
-                    // if (window.innerHeight > window.innerWidth) {
-                    //
-                    // }
                     block.css('width', (window.innerWidth - 500)/2 + 'px');
                 }
             card card
@@ -518,7 +516,8 @@ app
                 position absolute
                 top 0
                 right 0
-            @query window width != 0
+                width 0
+            @query window width > 550
                 {
                     block.css('width', (window.innerWidth - 500)/2 + 'px');
                 }
@@ -545,9 +544,9 @@ app
                 margin 12px 17px
             a link
                 target _blank
-                href https://github.com/stedn/class-warfare-chess
+                href https://leftwardist.org
                 icon github
-                    src img/GitHub-Mark-120px-plus.png
+                    src img/leftwardist.jpeg
         div help
             css
                 position absolute
@@ -720,29 +719,33 @@ app
                     paragraph p1
                         html
                             `
-                                <span style = 'font-weight: bold; font-size: 17px;'>Class Warfare Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and fight back.
-                                No more will we allow capitalism and its minions to use arbitrary color signifiers to pit us pawns against each other and keep us in our place. Today the workers of the world band together and strike!
+                                <span style = 'font-weight: bold; font-size: 17px;'>Class Warfare Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and fight.
+                                No more will we allow capitalism and its controllers to use arbitrary color signifiers to pit us pawns against each other. Today the workers of the world band together and strike back!
                             `
                     title t2
                         val instructions
                     paragraph p2
                         html
                             `
-                                Hit <span style = 'font-weight: bold;'>New Game</span> on the top right to begin a new game of chess. You will be the the Capitalists player.
+                                Hit <span style = 'font-weight: bold;'>New Game</span> on the top right to begin a new game of chess. You will be the Capitalist player.
                                 To share the game with a friend, send them the Game ID on the top right or the link to the current page, which also contains your Game ID.
                                 Your friend must join by visiting your link, <a href = '#'>chess.leftwardist.org/gameid</a>, on their own device, or by hitting <span style = 'font-weight: bold;'>Join Game</span>
-                                on the top right and entering your Game ID. When the other player joins, they are the Workers player.
+                                on the top right and entering your Game ID. When the other player joins, they are the Worker player.
                             `
                     title t3
                         val rules
                     paragraph p3
                         html
                             `
-                                The basic moves in Class Warfare Chess are the same as in regular chess. Pawns move from the outside in (1 square at a time), and royalty pieces can move under their regular rules (no castling).  It might seem impossible for the pawns to win this way BUT the key to this game is that the Capitalists get all their power by keeping the Workers in their place at the outside edge of the board.  For a given column, if there are not pieces in both of the outermost rows of the board (AKA the "factories"), the royalty pieces in that column are converted into pawns themselves, which can only move outwards from the centerline towards the ends of the board. When a Worker pawn is in the middle two rows of the board (rows 4 and 5), it becomes able to move as a king does in all directions (this enables it to attack sideways and move backwards). If it leaves the middle two rows it returns to being a regular pawn that can only step towards the center of the board. <br/>
-                                <img alt="hey" src="img/help.png"/>
-                                In addition, when the Capitalists pieces take a Worker pawn, the pawn isn't removed from the game, but is just replaced in either of the factories in the same column. If both factories are already full in the column where the pawn is attacked, then the pawn is removed from the game.<br/>
+                                The basic moves in Class Warfare Chess are the same as in regular chess. Pawns move from the outside in (1 square at a time), and royalty pieces can move under their regular rules (no castling).  It might seem impossible for the pawns to win this way BUT the key to this game is that the Capitalists get all their power by keeping the Workers in their place at the outside edge of the board.  For a given column, if there are not pieces in both of the outermost rows of the board (AKA the "factories"), the royalty pieces in that column are converted into pawns themselves, which can only move outwards from the centerline towards the ends of the board. <br/>
+                                <div style="text-align:center;"><img style="width:100%;" alt="pawn factory explanation" src="img/example_1.png"/></div>
+                                <br/>
+                                When a Worker pawn is in the middle two rows of the board (rows 4 and 5), it becomes able to move as a king does in all directions (this enables it to attack sideways and move backwards). If it leaves the middle two rows it returns to being a regular pawn that can only step towards the center of the board. <br/>
+                                <div style="text-align:center;"><img style="width:50%;" alt="pieces in home position" src="img/example_3.png"/></div>
+                                <br/>
+                                In addition, when the Capitalist pieces take a Worker pawn, the pawn isn't removed from the game, but is just replaced in either of the factories in the same column. If both factories are already full in the column where the pawn is attacked, then the pawn is removed from the game.<br/>
                                 Finally, the Capitalists' king is constrained to remain within the middle two rows (rows 4 and 5).
-                                For more detailed discussion of the rules and some strategy see <a href='#' target='_blank'>this article</a>.
+                                For more detailed discussion of the rules and some strategy see <a href='#' target='_blank'>this article</a> or join <a href="https://discord.gg/yZFgH8TH">our Discord forum</a>.
                             `
                     title t4
                         val objective
@@ -750,7 +753,7 @@ app
                         html
                             `
                                 The objective for the Workers is to put the Capitalist's King in check (AKA overthrowing capitalism).  For the Capitalists, the objective is to keep workers in their factories for as much of the game as possible. A scoreboard at the bottom shows a score based on how many factories have been open each day. For each column, Capitalists get 1 pt if both factories squares are filled, Workers get 1 pt if either is empty. <br/>
-                                If you want to learn more you can check out this article or watch our gameplay videos here and here.
+                                If you want to learn more you can check out this article, or watch gameplay videos here and here, or come chat on <a href="https://discord.gg/yZFgH8TH">our Discord server</a>.
                             `
                     title t5
                         val development
@@ -760,7 +763,7 @@ app
                                 Class Warfare Chess is under active development. It uses <a href = 'http://firebase.google.com' target = '_blank'>Firebase</a>'s database service to store game data.
                                 The code is located on <a href = 'http://github.com/stedn/class-warfare-chess' target = '_blank'>GitHub</a>.<br/>
                                 The game is based off of Anuv Gupta's <a href = 'http://github.com/anuvgupta/chessroom.ml' target = '_blank'>chessroom.ml</a>, with modifications to <a href = 'https://github.com/jhlywa/chess.js' target = '_blank'>chess.js</a>, and an upgrade to <a href='https://caustique.github.io/chessboard-js/#/' target = '_blank'>ChessboardJS</a> for the UI.<br/>
-                                Please get in touch with <a href='https://twitter.com/bonkerfield' target='_blank'>Will Stedden</a> if you'd like to help with development.  We'd really love to develop better services for recording games and analyzing strategy.
+                                Please get in touch with <a href='https://twitter.com/bonkerfield' target='_blank'>Will Stedden</a> or  join <a href="https://discord.gg/yZFgH8TH">on Discord</a> if you'd like to help with development.  We'd really love to develop better services for recording games and analyzing strategy.
                             `
     {
         block.on('board', {
