@@ -1303,15 +1303,6 @@ var Chess = function (fen) {
       return insufficient_material()
     },
 
-    game_over: function () {
-      return (
-        half_moves >= 100 ||
-        in_checkmate() ||
-        in_stalemate() ||
-        insufficient_material()
-      )
-    },
-
     validate_fen: function (fen) {
       return validate_fen(fen)
     },

@@ -39,8 +39,8 @@ app = {
     updateTurn: function (t) {
         if (t == 'w') this.turn = 'white';
         else this.turn = 'black';
-        if (t == 'w') cool_turn = 'white';
-        else cool_turn = 'black';
+        if (t == 'w') cool_turn = 'blue';
+        else cool_turn = 'red';
         var str = cool_turn.toUpperCase();
         if (this.chess.end_game()) {
             alert('GAME OVER, CAPITALISM DEFEATED! FINAL SCORE '+ 'CAPITALIST: ' + this.chess.get_cap_score() + ', WORKER: ' + this.chess.get_work_score())
@@ -104,6 +104,7 @@ app = {
                 }
             } else this.reset();
         } else this.loadFromCookies();
+        console.log(document.body.clientWidth)
     },
     loadFromCookies: function () {
         var idCookie = this.cookie('id');

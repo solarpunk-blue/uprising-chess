@@ -517,7 +517,7 @@ app
                 top 0
                 right 0
                 width 0
-            @query window width > 550
+            @query window width != 0
                 {
                     block.css('width', (window.innerWidth - 500)/2 + 'px');
                 }
