@@ -46,10 +46,17 @@ app = {
             alert('GAME OVER, CAPITALISM DEFEATED! FINAL SCORE '+ 'CAPITALIST: ' + this.chess.get_cap_score() + ', WORKER: ' + this.chess.get_work_score())
             str = 'GAME OVER, CAPITALISM DEFEATED!'
         }
-        this.block.on('turn', {
-            turn: this.turn,
-            text: str
-        });
+        if (this.state == 'pending'){
+            this.block.on('turn', {
+                turn: this.turn,
+                text: 'Wating for opponent'
+            });
+        } else {
+            this.block.on('turn', {
+                turn: this.turn,
+                text: 'Turn: ' + str
+            });
+        }
         this.block.on('info', { text: 'CAPITALIST SCORE: ' + this.chess.get_cap_score() + ', WORKER SCORE: ' + this.chess.get_work_score()});
     },
     pieceMove: function(move) {
@@ -303,8 +310,12 @@ app = {
                 that.chess.load_true(snapshot.val());
             }
         });
+        this.database.ref(id + '/state').on('value', function (snapshot) {
+            that.state = snapshot.val()
+            that.updateTurn(that.chess.turn());
+        });
         window.addEventListener('beforeunload', this.disconnect);
-    	window.history.pushState({ gameID: id }, 'Class Warfare Chess ' + id, id);
+    	window.history.pushState({ gameID: id }, 'General Strike Chess ' + id, id);
     	this.block.on('id', {
             action: 'set',
             id: id

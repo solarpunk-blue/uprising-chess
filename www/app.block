@@ -296,7 +296,7 @@ app
             }
             if (Block.is.str(data.text)) {
                 var messblock = block.child('main/chessboard/turn/message');
-                messblock.html('turn: ' + data.text);
+                messblock.html(data.text);
                 if (data.turn == app.player) messblock.data(' (you)');
             }
         }
@@ -347,12 +347,12 @@ app
                     css
                         width 400px
                     text
-                        html Class Warfare Chess
+                        html General Strike Chess
                 @query window width <= 515
                     css
                         width 95px
                     text
-                        html CWC
+                        html STRIKE!
                 @query window width <= 400
                     css
                         width 5px
@@ -641,7 +641,7 @@ app
                                 width 75px
                 div text
                     text text
-                        val Class Warfare Chess
+                        val General Strike Chess
                         css
                             text-transform uppercase
                             font-size 34px
@@ -718,12 +718,12 @@ app
                                 });
                             }
                     title t1
-                        val Class Warfare Chess
+                        val General Strike Chess
                     paragraph p1
                         html
                             `
-                                <span style = 'font-weight: bold; font-size: 17px;'>Class Warfare Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and fight.
-                                No more will we allow capitalism and its controllers to use arbitrary color signifiers to pit us pawns against each other. Today the workers of the world band together and strike back!
+                                <span style = 'font-weight: bold; font-size: 17px;'>General Strike Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and strike back against their oppressors.
+                                No more will the pawns allow capitalism and its defenders to use arbitrary color signifiers to pit them against each other. Today the workers of the world band together and strike back!
                             `
                     title t2
                         val instructions
@@ -740,7 +740,7 @@ app
                     paragraph p3
                         html
                             `
-                                The basic moves in Class Warfare Chess are the same as in regular chess. Pawns move from the outside in (1 square at a time), and royalty pieces can move under their regular rules (no castling).  It might seem impossible for the pawns to win this way BUT the key to this game is that the Capitalists get all their power by keeping the Workers in their place at the outside edge of the board.  For a given column, if there are not pieces in both of the outermost rows of the board (AKA the "factories"), the royalty pieces in that column are converted into pawns themselves, which can only move outwards from the centerline towards the ends of the board. <br/>
+                                The basic moves in General Strike Chess are the same as in regular chess. Pawns move from the outside in (1 square at a time), and royalty pieces can move under their regular rules (no castling).  It might seem impossible for the pawns to win this way BUT the key to this game is that the Capitalists get all their power by keeping the Workers in their place at the outside edge of the board.  For a given column, if there are not pieces in both of the outermost rows of the board (AKA the "factories"), the royalty pieces in that column are converted into pawns themselves, which can only move and attack like pawns outwards from the centerline towards the ends of the board. <br/>
                                 <div style="text-align:center;"><img style="width:100%;" alt="pawn factory explanation" src="img/example_1.png"/></div>
                                 <br/>
                                 When a Worker pawn is in the middle two rows of the board (rows 4 and 5), it becomes able to move as a king does in all directions (this enables it to attack sideways and move backwards). If it leaves the middle two rows it returns to being a regular pawn that can only step towards the center of the board. <br/>
@@ -763,7 +763,7 @@ app
                     paragraph p5
                         html
                             `
-                                Class Warfare Chess is under active development. It uses <a href = 'http://firebase.google.com' target = '_blank'>Firebase</a>'s database service to store game data.
+                                General Strike Chess is under active development. If you run into trouble please let us know on our <a href="https://discord.gg/yZFgH8TH">Discord server</a> or <a href = 'http://github.com/stedn/class-warfare-chess' target = '_blank'>Github project</a>.  It uses <a href = 'http://firebase.google.com' target = '_blank'>Firebase</a>'s database service to store game data.
                                 The code is located on <a href = 'http://github.com/stedn/class-warfare-chess' target = '_blank'>GitHub</a>.<br/>
                                 The game is based off of Anuv Gupta's <a href = 'http://github.com/anuvgupta/chessroom.ml' target = '_blank'>chessroom.ml</a>, with modifications to <a href = 'https://github.com/jhlywa/chess.js' target = '_blank'>chess.js</a>, and an upgrade to <a href='https://caustique.github.io/chessboard-js/#/' target = '_blank'>ChessboardJS</a> for the UI.<br/>
                                 Please get in touch with <a href='https://twitter.com/bonkerfield' target='_blank'>Will Stedden</a> or  join <a href="https://discord.gg/yZFgH8TH">on Discord</a> if you'd like to help with development.  We'd really love to develop better services for recording games and analyzing strategy.
