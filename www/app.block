@@ -722,8 +722,8 @@ app
                     paragraph p1
                         html
                             `
-                                <span style = 'font-weight: bold; font-size: 17px;'>General Strike Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and strike back against their oppressors.
-                                No more will the pawns allow capitalism and its defenders to use arbitrary color signifiers to pit them against each other. Today the workers of the world band together and strike back!
+                                <span style = 'font-weight: bold; font-size: 17px;'>General Strike Chess</span> is an online multiplayer chess game with alternate rules where the pawns rise up and revolt against their oppressors.
+                                No more will the workers allow capitalism and its defenders to use arbitrary color signifiers to pit them against each other. Today the workers of the world band together and strike back!
                             `
                     title t2
                         val instructions
@@ -748,7 +748,7 @@ app
                                 <br/>
                                 In addition, when the Capitalist pieces take a Worker pawn, the pawn isn't removed from the game, but is just replaced in either of the factories in the same column. If both factories are already full in the column where the pawn is attacked, then the pawn is removed from the game.<br/>
                                 Finally, the Capitalists' king is constrained to remain within the middle two rows (rows 4 and 5).
-                                For more detailed discussion of the rules and some strategy see <a href='#' target='_blank'>this article</a> or join <a href="https://discord.gg/yZFgH8TH">our Discord forum</a>.
+                                For more detailed discussion of the rules and some strategy see <a href='https://leftwardist.org/commentary/2021/10/09/general-strike-chess.html' target='_blank'>this article</a> or join <a href="https://discord.gg/yZFgH8TH">our Discord forum</a>.
                             `
                     title t4
                         val objective
@@ -756,7 +756,7 @@ app
                         html
                             `
                                 The objective for the Workers is to put the Capitalist's King in check (AKA overthrowing capitalism).  For the Capitalists, the objective is to keep workers in their factories for as much of the game as possible. A scoreboard at the bottom shows a score based on how many factories have been open each day. For each column, Capitalists get 1 pt if both factories squares are filled, Workers get 1 pt if either is empty. <br/>
-                                If you want to learn more you can check out this article, or watch gameplay videos here and here, or come chat on <a href="https://discord.gg/yZFgH8TH">our Discord server</a>.
+                                If you want to learn more you can check out <a href='https://leftwardist.org/commentary/2021/10/09/general-strike-chess.html'>this article</a> or come chat on <a href="https://discord.gg/yZFgH8TH">our Discord server</a>.
                             `
                     title t5
                         val development
