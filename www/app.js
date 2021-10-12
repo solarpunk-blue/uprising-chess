@@ -13,16 +13,19 @@ app = {
     // initialize firebase
     firebase: (function () {
         window.firebase.initializeApp({
-            apiKey: "AIzaSyA9p387gzJaMguzavE4yFo7rD7QoyOh_2E",
-            authDomain: "class-warfare-chess.firebaseapp.com",
-            projectId: "class-warfare-chess",
-            storageBucket: "class-warfare-chess.appspot.com",
-            databaseURL: "https://class-warfare-chess-default-rtdb.firebaseio.com"
+          apiKey: "AIzaSyA9p387gzJaMguzavE4yFo7rD7QoyOh_2E",
+          authDomain: "class-warfare-chess.firebaseapp.com",
+          databaseURL: "https://class-warfare-chess-default-rtdb.firebaseio.com",
+          projectId: "class-warfare-chess",
+          storageBucket: "class-warfare-chess.appspot.com",
+          messagingSenderId: "492419721962",
+          appId: "1:492419721962:web:7257bfd58678146e4c0593",
+          measurementId: "G-D76LFJSEP9"
         });
         return window.firebase;
     })(),
     database: window.firebase.database(),
-    alphanum: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+    alphanum: 'abcdefghijklmnopqrstuvwxyz0123456789',
     // app functions
     key: function (length) {
     	var text = '';
@@ -49,7 +52,7 @@ app = {
         if (this.state == 'pending'){
             this.block.on('turn', {
                 turn: this.turn,
-                text: 'Wating for opponent'
+                text: 'Waiting for opponent'
             });
         } else {
             this.block.on('turn', {
