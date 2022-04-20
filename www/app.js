@@ -1,4 +1,5 @@
 // initialize app
+
 var app;
 app = {
     id: '',
@@ -13,14 +14,7 @@ app = {
     // initialize firebase
     firebase: (function () {
         window.firebase.initializeApp({
-          apiKey: "AIzaSyA9p387gzJaMguzavE4yFo7rD7QoyOh_2E",
-          authDomain: "class-warfare-chess.firebaseapp.com",
-          databaseURL: "https://class-warfare-chess-default-rtdb.firebaseio.com",
-          projectId: "class-warfare-chess",
-          storageBucket: "class-warfare-chess.appspot.com",
-          messagingSenderId: "492419721962",
-          appId: "1:492419721962:web:7257bfd58678146e4c0593",
-          measurementId: "G-D76LFJSEP9"
+
         });
         return window.firebase;
     })(),
@@ -45,36 +39,125 @@ app = {
         if (t == 'w') cool_turn = 'blue';
         else cool_turn = 'red';
         var str = cool_turn.toUpperCase();
-        if (this.chess.end_game()) {
-            alert('GAME OVER, CAPITALISM DEFEATED! FINAL SCORE '+ 'CAPITALIST: ' + this.chess.get_cap_score() + ', WORKER: ' + this.chess.get_work_score())
-            str = 'GAME OVER, CAPITALISM DEFEATED!'
-        }
-        if (this.state == 'pending'){
+        if (this.chess.fen().indexOf('K')==-1) {
+            str = 'GAME OVER, CAPITALISM DEFEATED! FINAL SCORE '+ 'CAPITALIST: ' + this.chess.get_cap_score() + ', WORKER: ' + this.chess.get_work_score()
+            alert(str)
+            this.block.on('info', { text: 'CAPITALIST SCORE: ' + this.chess.get_cap_score() + ', WORKER SCORE: ' + this.chess.get_work_score()});
             this.block.on('turn', {
                 turn: this.turn,
-                text: 'Waiting for opponent'
+                text: 'GAME OVER'
             });
-        } else {
-            this.block.on('turn', {
-                turn: this.turn,
-                text: 'Turn: ' + str
-            });
+        } else{
+            if (this.state == 'pending'){
+                this.block.on('turn', {
+                    turn: this.turn,
+                    text: 'Waiting for opponent'
+                });
+            } else {
+                this.block.on('turn', {
+                    turn: this.turn,
+                    text: 'Turn: ' + str
+                });
+            }
+            this.block.on('info', { text: 'CAPITALIST SCORE: ' + this.chess.get_cap_score() + ', WORKER SCORE: ' + this.chess.get_work_score()});
         }
-        this.block.on('info', { text: 'CAPITALIST SCORE: ' + this.chess.get_cap_score() + ', WORKER SCORE: ' + this.chess.get_work_score()});
     },
-    pieceMove: function(move) {
-      var chessMove = app.chess.move({
-              from: move.from,
-              to: move.to
-            });
+    aiMove: async function(){
+        // this simple AI is based on https://github.com/gautambajaj/Chess-AI/
+        // the objective functions have been updated to reflect Uprising Chess
+        const possibleNextMoves = app.chess.moves({verbose: true})
 
-      if (chessMove !== null) {
-        app.chess.updateFactories()
-        app.updateTurn(app.chess.turn());
+        var bestMove = -9999;
+        var bestMoveFound;
+        var bestMoveInd = -1;
+
+        store_vals = []
+        for(var tryMove = 0; tryMove < possibleNextMoves.length; tryMove++) {
+            var possibleNextMove = possibleNextMoves[tryMove]
+
+            value = app.testMove(possibleNextMove)
+            store_vals.push(value)
+            if(value >= bestMove) {
+                bestMove = value;
+                bestMoveFound = possibleNextMove;
+                bestMoveInd = tryMove
+            }
+        }
+        console.log(store_vals)
+        console.log(bestMove+': '+bestMoveInd + '/'+possibleNextMoves.length)
+        if (bestMoveFound){
+            app.chess.move(bestMoveFound)
+        } else{
+            console.log('no bestMOveFound wtf?')
+            app.chess.move(possibleNextMoves[0])
+        }
+
+        app.chess.updateFactories(true)
+        app.updateTurn(app.chess.turn())
+
         app.database.ref(app.id + '/cap_score').set(app.chess.get_cap_score());
         app.database.ref(app.id + '/work_score').set(app.chess.get_work_score());
         app.database.ref(app.id + '/fen').set(app.chess.fen());
         app.database.ref(app.id + '/true_fen').set(app.chess.true_fen());
+
+        app.board.position(app.chess.fen());
+        document.getElementById('loader').style.visibility = 'hidden'
+    },
+    testMove: function(possibleNextMove) {
+        //save all state details
+        saveFen = app.chess.fen()
+        saveTrueFen = app.chess.true_fen()
+
+        // make move
+        if(app.pieceMove(possibleNextMove, true)){
+            //first arg is minimaxDepth (set to 2 here)
+            value = minimax(2, -10000, 10000, false);
+
+        } else{
+            console.log('possibleNextMove not possible, wtf?')
+            value = 0
+        }
+
+        //reset all state details
+        app.chess.load(saveFen)
+        app.chess.load_true(saveTrueFen)
+
+        return value
+    },
+    displayLoader: function(){
+        if (document.getElementById('loader')){
+            document.getElementById('loader').style.visibility = 'visible'
+        } else {
+            var myDiv = document.createElement("div");
+            myDiv.id = 'loader';
+            myDiv.innerHTML = `<div style = 'position: absolute; top: 0; left; 0; width: 100%; height: 100%; display: table; text-align: center; opacity: 1; transition: opacity 0.1s ease;'>
+                <div style = 'display: table-cell; vertical-align: middle; margin: 0 auto;'>
+                    <img src = 'img/ripple.gif'/>
+                </div>
+            </div>`;
+            document.body.appendChild(myDiv);
+        }
+    },
+    pieceMove: function(move, testMove) {
+      var chessMove = app.chess.move({
+              from: move.from,
+              to: move.to
+            });
+      if (chessMove !== null) {
+        app.chess.updateFactories(testMove)
+        if (!testMove){
+          app.updateTurn(app.chess.turn());
+          if (app.solo == 'yes' && app.chess.fen().indexOf('K')>-1){
+              app.board.position(app.chess.fen());
+              app.displayLoader()
+              setTimeout(app.aiMove,1000)
+          }else{
+              app.database.ref(app.id + '/cap_score').set(app.chess.get_cap_score());
+              app.database.ref(app.id + '/work_score').set(app.chess.get_work_score());
+              app.database.ref(app.id + '/fen').set(app.chess.fen());
+              app.database.ref(app.id + '/true_fen').set(app.chess.true_fen());
+          }
+        }
       }
 
       return app.chess.fen();
@@ -113,8 +196,7 @@ app = {
                 	});
                 }
             } else this.reset();
-        } else this.loadFromCookies();
-        console.log(document.body.clientWidth)
+        }
     },
     loadFromCookies: function () {
         var idCookie = this.cookie('id');
@@ -125,13 +207,6 @@ app = {
     reset: function () {
         // window.history.pushState({ gameID: '' }, 'chessroom.ml', '/');
         // window.location.reload();
-    },
-    updateSpectators: function () {
-        var that = this;
-        this.database.ref(this.id + '/spectators').once('value', function (snapshot) {
-            if (snapshot.exists())
-                that.block.on('info', { text: 'Spectators: ' + snapshot.val() });
-        });
     },
     disconnect: function () {
         var that = this;
@@ -157,12 +232,35 @@ app = {
                 state: 'new',
                 fen: (new Chess()).fen(),
                 messages: 0,
-                spectators: 0
+                spectators: 0,
+                solo: 'no'
             });
             that.database.ref(id).once('value', function (snapshot) {
                 that.loadGame(id, snapshot.val());
             });
     	});
+    },
+    newSoloGame: function () {
+        document.querySelector("[block='modal']").style.visibility = "hidden"
+        var that = this;
+        this.block.on('players', {
+            spect: 'null',
+            text: 'New Game'
+        });
+        this.database.ref().once('value', function (snapshot) {
+            var id = that.key(5);
+            while (snapshot.child(id).exists()) id = that.key(5);
+            that.database.ref(id).set({
+                state: 'new',
+                fen: (new Chess()).fen(),
+                messages: 0,
+                spectators: 0,
+                solo: 'yes'
+            });
+            that.database.ref(id).once('value', function (snapshot) {
+                that.loadGame(id, snapshot.val());
+            });
+        });
     },
     joinGame: function (id, player) {
         if (this.validateID(id)) {
@@ -183,12 +281,16 @@ app = {
             game.cap_score = 0
             game.work_score = 0
         }
+        if (game.solo == null){
+            game.solo = 'no'
+        }
         var that = this;
         this.disconnect();
         this.id = id;
         this.board.start();
         this.chess = new Chess();
         this.state = game.state;
+        this.solo = game.solo
         if (Block.is.str(player)) {
             if (player == 'black')
                 game.state = 'pending';
@@ -196,7 +298,27 @@ app = {
                 game.state = 'new';
             } else player = '';
         }
-        if (game.state == 'new') {
+        if (game.solo == 'yes'){
+            this.player = 'black';
+            if (!this.userLoggedIn) this.username = 'Workers';
+            this.block.on('board', {
+                action: 'show',
+                amount: 'full'
+            })
+            .on('players', {
+                white: {
+                    card: 'show',
+                    sub: false
+                },
+                black: {
+                    card: 'show',
+                    sub: 'you'
+                },
+                spect: 'null'
+            });
+            this.database.ref(id + '/state').set('commenced');
+            this.state = 'commenced';
+        } else if (game.state == 'new') {
             this.player = 'white';
             if (!this.userLoggedIn) this.username = 'Capitalists';
             this.block.on('board', {
@@ -318,7 +440,7 @@ app = {
             that.updateTurn(that.chess.turn());
         });
         window.addEventListener('beforeunload', this.disconnect);
-    	window.history.pushState({ gameID: id }, 'General Strike Chess ' + id, id);
+    	window.history.pushState({ gameID: id }, 'Uprising Chess ' + id, id);
     	this.block.on('id', {
             action: 'set',
             id: id
@@ -338,6 +460,182 @@ app = {
     }
 };
 
+var minimax = function (depth, alpha, beta, isMaximisingPlayer) {
+    if (depth === 0) {
+        return -evaluateBoard(app.chess.board());
+    }
+
+    var possibleNextMoves = app.chess.moves({verbose: true});
+    var numPossibleMoves = possibleNextMoves.length
+    if (isMaximisingPlayer) {
+        var bestMove = -9999;
+        for (var i = 0; i < numPossibleMoves; i++) {
+            //save state
+            var saveFen_tmp = app.chess.fen()
+            var saveTrueFen_tmp = app.chess.true_fen()
+
+            // make move
+            if(app.pieceMove(possibleNextMoves[i], true)){
+                bestMove = Math.max(bestMove, minimax(depth - 1, alpha, beta, !isMaximisingPlayer));
+                alpha = Math.max(alpha, bestMove);
+            } else {
+                console.log('minimax move not possible, wtf?')
+            }
+            // reset state
+            app.chess.load(saveFen_tmp)
+            app.chess.load_true(saveTrueFen_tmp)
+
+            // possibly stop early
+            if(beta <= alpha){
+                return bestMove;
+            }
+        }
+    } else {
+        var bestMove = 9999;
+        for (var i = 0; i < numPossibleMoves; i++) {
+            //save state
+            var saveFen = app.chess.fen()
+            var saveTrueFen = app.chess.true_fen()
+
+            // make move
+            if(app.pieceMove(possibleNextMoves[i], true)){
+                bestMove = Math.min(bestMove, minimax(depth - 1, alpha, beta, !isMaximisingPlayer));
+                beta = Math.min(beta, bestMove);
+            } else {
+                console.log('minimax move not possible, wtf?')
+            }
+            // reset state
+            app.chess.load(saveFen)
+            app.chess.load_true(saveTrueFen)
+
+            // possibly stop early
+            if(beta <= alpha){
+                return bestMove;
+            }
+        }
+    }
+
+    return bestMove;
+};
+
+var evaluateBoard = function (board) {
+    var totalEvaluation = 0;
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            totalEvaluation = totalEvaluation + getPieceValue(board[i][j], i, j);
+        }
+    }
+    return totalEvaluation;
+};
+
+
+var reverseArray = function(array) {
+    return array.slice().reverse();
+};
+
+var blackPawnEval =
+    [
+        [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [-5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0],
+        [-9.0, -9.0, -9.0, -9.0, -9.0, -9.0, -9.0, -9.0],
+        [-9.0, -9.0, -9.0, -9.0, -9.0, -9.0, -9.0, -9.0],
+        [-5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
+    ];
+
+var whitePawnEval = [
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+    ];
+
+var knightEval = [
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0]
+    ];
+
+var whiteBishopEval = [
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0]
+    ];
+
+var whiteRookEval = [
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0]
+    ];
+
+var evalQueen = [
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [ 4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0,  4.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0]
+    ];
+
+var whiteKingEval = [
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+    ];
+
+var getPieceValue = function (piece, x, y) {
+    if (piece === null) {
+        return 0;
+    }
+
+    return -getAbsoluteValue(piece, piece.color === 'w', x ,y);
+};
+
+
+var getAbsoluteValue = function (piece, isWhite, x ,y) {
+    if (piece.type === 'p') {
+        return (isWhite ? whitePawnEval[y][x] : blackPawnEval[y][x] );
+    } else if (piece.type === 'r') {
+        return 5//+(isWhite ? whiteRookEval[y][x] : blackRookEval[y][x] );
+    } else if (piece.type === 'n') {
+        return 5//+knightEval[y][x];
+    } else if (piece.type === 'b') {
+        return 5//+( isWhite ? whiteBishopEval[y][x] : blackBishopEval[y][x] );
+    } else if (piece.type === 'q') {
+        return 10//+evalQueen[y][x];
+    } else if (piece.type === 'k') {
+        return 100//+( isWhite ? whiteKingEval[y][x] : blackKingEval[y][x] );
+    }
+};
+
 // load blocks
 window.addEventListener('load', function () {
     setTimeout(function () {
@@ -346,9 +644,14 @@ window.addEventListener('load', function () {
             setTimeout(function () {
                 block.css('transition', 'opacity 0.5s ease');
                 block.css('opacity', '1');
-            }, 20);
+            }, 10);
             Block.queries();
+            if(window.location.pathname.substring(1)!=''){
+                document.querySelector("[block='modal']").style.visibility = "hidden"
+            }
             app.load(block.key('boardID'));
+
         }, 'app', 'jQuery');
     }, 1000);
 });
+

@@ -197,17 +197,22 @@ var Chess = function (fen) {
     load(DEFAULT_POSITION)
   }
 
-  function updateFactories(){
+  function updateFactories(testMove){
+    king_place = -1
     for (var i = 0; i <= 7; i++) {
       if (board[i] == null | board[112+i] == null) {
-        work_score++
+        if(!testMove){
+          work_score++
+        }
         for (var j = 0; j <= 7; j++){
           if (board[i+16*j] != null && board[i+16*j].color == 'w' && board[i+16*j].type != KING){
             board[i+16*j].type = PAWN
           }
         }
       } else {
-        cap_score++
+        if(!testMove){
+          cap_score++
+        }
         for (var j = 0; j <= 7; j++){
           if (board[i+16*j] != null && board[i+16*j].color == 'w' && board[i+16*j].type == PAWN){
             board[i+16*j].type = true_board[i+16*j].type
@@ -217,10 +222,8 @@ var Chess = function (fen) {
     }
   }
 
-  function load(fen, keep_headers) {
-    if (typeof keep_headers === 'undefined') {
-      keep_headers = false
-    }
+  function load(fen) {
+    keep_headers = false
 
     var tokens = fen.split(/\s+/)
     var position = tokens[0]
@@ -270,7 +273,7 @@ var Chess = function (fen) {
     return true
   }
 
-  function load_true(fen, keep_headers) {
+  function load_true(fen) {
 
     var tokens = fen.split(/\s+/)
     var position = tokens[0]
@@ -603,13 +606,13 @@ var Chess = function (fen) {
     return piece
   }
 
-  function build_move(board, from, to, flags, promotion) {
+  function build_move(brd, from, to, flags, promotion) {
     var move = {
       color: turn,
       from: from,
       to: to,
       flags: flags,
-      piece: board[from].type,
+      piece: brd[from].type,
     }
 
     if (promotion) {
@@ -617,8 +620,8 @@ var Chess = function (fen) {
       move.promotion = promotion
     }
 
-    if (board[to]) {
-      move.captured = board[to].type
+    if (brd[to]) {
+      move.captured = brd[to].type
     } else if (flags & BITS.EP_CAPTURE) {
       move.captured = PAWN
     }
@@ -626,9 +629,9 @@ var Chess = function (fen) {
   }
 
   function generate_moves(options) {
-    function add_move(board, moves, from, to, flags) {
+    function add_move(brd, moves, from, to, flags) {
       /* if pawn promotion */
-      moves.push(build_move(board, from, to, flags))
+      moves.push(build_move(brd, from, to, flags))
     }
 
     var moves = []
@@ -682,7 +685,6 @@ var Chess = function (fen) {
           which_pawn = 'm'
           for (j = 0; j < 8; j++) {
             var square = i + PAWN_OFFSETS[which_pawn][j]
-            console.log(square)
             if (square & 0x88) continue
 
             if (board[square] != null && board[square].color === them) {
@@ -832,87 +834,9 @@ var Chess = function (fen) {
     return kings[WHITE]<0
   }
 
-  function in_check() {
-    if (turn == 'b'){
-      return false
-    }
-    return king_attacked(turn)
-  }
-
-  function in_checkmate() {
-    return in_check() && generate_moves().length === 0
-  }
-
-  function in_stalemate() {
-    return !in_check() && generate_moves().length === 0
-  }
-
-  function insufficient_material() {
-    var pieces = {}
-    var bishops = []
-    var num_pieces = 0
-    var sq_color = 0
-
-    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
-      sq_color = (sq_color + 1) % 2
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
-
-      var piece = board[i]
-      if (piece) {
-        pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1
-        if (piece.type === BISHOP) {
-          bishops.push(sq_color)
-        }
-        num_pieces++
-      }
-    }
-
-    /* k vs. k */
-    if (num_pieces === 2) {
-      return true
-    } else if (
-      /* k vs. kn .... or .... k vs. kb */
-      num_pieces === 3 &&
-      (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)
-    ) {
-      return true
-    } else if (num_pieces === pieces[BISHOP] + 2) {
-      /* kb vs. kb where any number of bishops are all on the same color */
-      var sum = 0
-      var len = bishops.length
-      for (var i = 0; i < len; i++) {
-        sum += bishops[i]
-      }
-      if (sum === 0 || sum === len) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-
-
-  function push(move) {
-    history.push({
-      move: move,
-      kings: { b: kings.b, w: kings.w },
-      turn: turn,
-      castling: { b: castling.b, w: castling.w },
-      ep_square: ep_square,
-      half_moves: half_moves,
-      move_number: move_number,
-    })
-  }
-
   function make_move(move) {
     var us = turn
     var them = swap_color(us)
-    push(move)
-
 
     if (board[move.to] != null && board[move.to].type == PAWN && board[move.to].color == 'b'){
       if (board[move.to % 16] == null){
@@ -946,59 +870,6 @@ var Chess = function (fen) {
       move_number++
     }
     turn = swap_color(turn)
-  }
-
-
-
-  /* this function is used to uniquely identify ambiguous moves */
-  function get_disambiguator(move, moves) {
-    var from = move.from
-    var to = move.to
-    var piece = move.piece
-
-    var ambiguities = 0
-    var same_rank = 0
-    var same_file = 0
-
-    for (var i = 0, len = moves.length; i < len; i++) {
-      var ambig_from = moves[i].from
-      var ambig_to = moves[i].to
-      var ambig_piece = moves[i].piece
-
-      /* if a move of the same piece type ends on the same to square, we'll
-       * need to add a disambiguator to the algebraic notation
-       */
-      if (piece === ambig_piece && from !== ambig_from && to === ambig_to) {
-        ambiguities++
-
-        if (rank(from) === rank(ambig_from)) {
-          same_rank++
-        }
-
-        if (file(from) === file(ambig_from)) {
-          same_file++
-        }
-      }
-    }
-
-    if (ambiguities > 0) {
-      /* if there exists a similar moving piece on the same rank and file as
-       * the move in question, use the square as the disambiguator
-       */
-      if (same_rank > 0 && same_file > 0) {
-        return algebraic(from)
-      } else if (same_file > 0) {
-        /* if the moving piece rests on the same file, use the rank symbol as the
-         * disambiguator
-         */
-        return algebraic(from).charAt(1)
-      } else {
-        /* else use the file symbol */
-        return algebraic(from).charAt(0)
-      }
-    }
-
-    return ''
   }
 
   function infer_piece_type(san) {
@@ -1043,106 +914,6 @@ var Chess = function (fen) {
     s += '     a  b  c  d  e  f  g  h\n'
 
     return s
-  }
-
-  // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  function move_from_san(move, sloppy) {
-    // strip off any move decorations: e.g Nf3+?! becomes Nf3
-    var clean_move = stripped_san(move)
-
-    var overly_disambiguated = false
-
-    if (sloppy) {
-      // The sloppy parser allows the user to parse non-standard chess
-      // notations. This parser is opt-in (by specifying the
-      // '{ sloppy: true }' setting) and is only run after the Standard
-      // Algebraic Notation (SAN) parser has failed.
-      //
-      // When running the sloppy parser, we'll run a regex to grab the piece,
-      // the to/from square, and an optional promotion piece. This regex will
-      // parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7, f7f8q,
-      // b1c3
-
-      // NOTE: Some positions and moves may be ambiguous when using the sloppy
-      // parser. For example, in this position: 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1,
-      // the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated
-      // bishop move). In these cases, the sloppy parser will default to the
-      // most most basic interpretation - b1c3 parses to Nc3.
-
-      var matches = clean_move.match(
-        /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
-      )
-      if (matches) {
-        var piece = matches[1]
-        var from = matches[2]
-        var to = matches[3]
-        var promotion = matches[4]
-
-        if (from.length == 1) {
-          overly_disambiguated = true
-        }
-      } else {
-        // The [a-h]?[1-8]? portion of the regex below handles moves that may
-        // be overly disambiguated (e.g. Nge7 is unnecessary and non-standard
-        // when there is one legal knight move to e7). In this case, the value
-        // of 'from' variable will be a rank or file, not a square.
-        var matches = clean_move.match(
-          /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/
-        )
-
-        if (matches) {
-          var piece = matches[1]
-          var from = matches[2]
-          var to = matches[3]
-          var promotion = matches[4]
-
-          if (from.length == 1) {
-            var overly_disambiguated = true
-          }
-        }
-      }
-    }
-
-    var piece_type = infer_piece_type(clean_move)
-    var moves = generate_moves({
-      legal: true,
-      piece: piece ? piece : piece_type,
-    })
-
-    for (var i = 0, len = moves.length; i < len; i++) {
-      // try the strict parser first, then the sloppy parser if requested
-      // by the user
-      if (clean_move === stripped_san(move_to_san(moves[i], moves))) {
-        return moves[i]
-      } else {
-        if (sloppy && matches) {
-          // hand-compare move properties with the results from our sloppy
-          // regex
-          if (
-            (!piece || piece.toLowerCase() == moves[i].piece) &&
-            SQUARES[from] == moves[i].from &&
-            SQUARES[to] == moves[i].to &&
-            (!promotion || promotion.toLowerCase() == moves[i].promotion)
-          ) {
-            return moves[i]
-          } else if (overly_disambiguated) {
-            // SPECIAL CASE: we parsed a move string that may have an unneeded
-            // rank/file disambiguator (e.g. Nge7).  The 'from' variable will
-            var square = algebraic(moves[i].from)
-            if (
-              (!piece || piece.toLowerCase() == moves[i].piece) &&
-              SQUARES[to] == moves[i].to &&
-              (from == square[0] || from == square[1]) &&
-              (!promotion || promotion.toLowerCase() == moves[i].promotion)
-            ) {
-              return moves[i]
-            }
-          }
-        }
-      }
-    }
-
-    return null
   }
 
   /*****************************************************************************
@@ -1204,6 +975,14 @@ var Chess = function (fen) {
 
   function trim(str) {
     return str.replace(/^\s+|\s+$/g, '')
+  }
+
+  function undo_move() {
+    var old = history.pop();
+    if (old == null) { return null; }
+
+    board = [...old]
+    return board
   }
 
 
@@ -1283,26 +1062,6 @@ var Chess = function (fen) {
       return moves
     },
 
-    in_check: function () {
-      return in_check()
-    },
-
-    end_game: function () {
-      return game_over()
-    },
-
-    in_checkmate: function () {
-      return in_checkmate()
-    },
-
-    in_stalemate: function () {
-      return in_stalemate()
-    },
-
-    insufficient_material: function () {
-      return insufficient_material()
-    },
-
     validate_fen: function (fen) {
       return validate_fen(fen)
     },
@@ -1334,209 +1093,9 @@ var Chess = function (fen) {
 
       return output
     },
-    updateFactories: function (){
-      updateFactories()
-    },
 
-    load_pgn: function (pgn, options) {
-      // allow the user to specify the sloppy move parser to work around over
-      // disambiguation bugs in Fritz and Chessbase
-      var sloppy =
-        typeof options !== 'undefined' && 'sloppy' in options
-          ? options.sloppy
-          : false
-
-      function mask(str) {
-        return str.replace(/\\/g, '\\')
-      }
-
-      function has_keys(object) {
-        for (var key in object) {
-          return true
-        }
-        return false
-      }
-
-      function parse_pgn_header(header, options) {
-        var newline_char =
-          typeof options === 'object' &&
-          typeof options.newline_char === 'string'
-            ? options.newline_char
-            : '\r?\n'
-        var header_obj = {}
-        var headers = header.split(new RegExp(mask(newline_char)))
-        var key = ''
-        var value = ''
-
-        for (var i = 0; i < headers.length; i++) {
-          key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1')
-          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\ *\]$/, '$1')
-          if (trim(key).length > 0) {
-            header_obj[key] = value
-          }
-        }
-
-        return header_obj
-      }
-
-      var newline_char =
-        typeof options === 'object' && typeof options.newline_char === 'string'
-          ? options.newline_char
-          : '\r?\n'
-
-      // RegExp to split header. Takes advantage of the fact that header and movetext
-      // will always have a blank line between them (ie, two newline_char's).
-      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
-      var header_regex = new RegExp(
-        '^(\\[((?:' +
-          mask(newline_char) +
-          ')|.)*\\])' +
-          '(?:' +
-          mask(newline_char) +
-          '){2}'
-      )
-
-      // If no header given, begin with moves.
-      var header_string = header_regex.test(pgn)
-        ? header_regex.exec(pgn)[1]
-        : ''
-
-      // Put the board in the starting position
-      reset()
-
-      /* parse PGN header */
-      var headers = parse_pgn_header(header_string, options)
-      for (var key in headers) {
-        set_header([key, headers[key]])
-      }
-
-      /* load the starting position indicated by [Setup '1'] and
-       * [FEN position] */
-      if (headers['SetUp'] === '1') {
-        if (!('FEN' in headers && load(headers['FEN'], true))) {
-          // second argument to load: don't clear the headers
-          return false
-        }
-      }
-
-      /* NB: the regexes below that delete move numbers, recursive
-       * annotations, and numeric annotation glyphs may also match
-       * text in comments. To prevent this, we transform comments
-       * by hex-encoding them in place and decoding them again after
-       * the other tokens have been deleted.
-       *
-       * While the spec states that PGN files should be ASCII encoded,
-       * we use {en,de}codeURIComponent here to support arbitrary UTF8
-       * as a convenience for modern users */
-
-      var to_hex = function (string) {
-        return Array.from(string)
-          .map(function (c) {
-            /* encodeURI doesn't transform most ASCII characters,
-             * so we handle these ourselves */
-            return c.charCodeAt(0) < 128
-              ? c.charCodeAt(0).toString(16)
-              : encodeURIComponent(c).replace(/\%/g, '').toLowerCase()
-          })
-          .join('')
-      }
-
-      var from_hex = function (string) {
-        return string.length == 0
-          ? ''
-          : decodeURIComponent('%' + string.match(/.{1,2}/g).join('%'))
-      }
-
-      var encode_comment = function (string) {
-        string = string.replace(new RegExp(mask(newline_char), 'g'), ' ')
-        return `{${to_hex(string.slice(1, string.length - 1))}}`
-      }
-
-      var decode_comment = function (string) {
-        if (string.startsWith('{') && string.endsWith('}')) {
-          return from_hex(string.slice(1, string.length - 1))
-        }
-      }
-
-      /* delete header to get the moves */
-      var ms = pgn
-        .replace(header_string, '')
-        .replace(
-          /* encode comments so they don't get deleted below */
-          new RegExp(`(\{[^}]*\})+?|;([^${mask(newline_char)}]*)`, 'g'),
-          function (match, bracket, semicolon) {
-            return bracket !== undefined
-              ? encode_comment(bracket)
-              : ' ' + encode_comment(`{${semicolon.slice(1)}}`)
-          }
-        )
-        .replace(new RegExp(mask(newline_char), 'g'), ' ')
-
-      /* delete recursive annotation variations */
-      var rav_regex = /(\([^\(\)]+\))+?/g
-      while (rav_regex.test(ms)) {
-        ms = ms.replace(rav_regex, '')
-      }
-
-      /* delete move numbers */
-      ms = ms.replace(/\d+\.(\.\.)?/g, '')
-
-      /* delete ... indicating black to move */
-      ms = ms.replace(/\.\.\./g, '')
-
-      /* delete numeric annotation glyphs */
-      ms = ms.replace(/\$\d+/g, '')
-
-      /* trim and get array of moves */
-      var moves = trim(ms).split(new RegExp(/\s+/))
-
-      /* delete empty entries */
-      moves = moves.join(',').replace(/,,+/g, ',').split(',')
-      var move = ''
-
-      var result = ''
-
-      for (var half_move = 0; half_move < moves.length; half_move++) {
-        var comment = decode_comment(moves[half_move])
-        if (comment !== undefined) {
-          comments[generate_fen()] = comment
-          continue
-        }
-
-        move = move_from_san(moves[half_move], sloppy)
-
-        /* invalid move */
-        if (move == null) {
-          /* was the move an end of game marker */
-          if (TERMINATION_MARKERS.indexOf(moves[half_move]) > -1) {
-            result = moves[half_move]
-          } else {
-            return false
-          }
-        } else {
-          /* reset the end of game marker if making a valid move */
-          result = ''
-          make_move(move)
-        }
-      }
-
-      /* Per section 8.2.6 of the PGN spec, the Result tag pair must match
-       * match the termination marker. Only do this when headers are present,
-       * but the result tag is missing
-       */
-      if (result && Object.keys(header).length && !header['Result']) {
-        set_header(['Result', result])
-      }
-
-      return true
-    },
-
-    header: function () {
-      return set_header(arguments)
-    },
-
-    ascii: function () {
-      return ascii()
+    updateFactories: function (testMove){
+      updateFactories(testMove)
     },
 
     turn: function () {
@@ -1583,12 +1142,10 @@ var Chess = function (fen) {
 
       var move_obj = null
 
-      if (typeof move === 'string') {
-        move_obj = move_from_san(move, sloppy)
-      } else if (typeof move === 'object') {
-        var moves = generate_moves()
+      var moves = generate_moves()
 
-        /* convert the pretty move object to an ugly move object */
+      /* convert the pretty move object to an ugly move object */
+      if (typeof move === 'object') {
         for (var i = 0, len = moves.length; i < len; i++) {
           if (
             move.from === algebraic(moves[i].from) &&
@@ -1600,6 +1157,8 @@ var Chess = function (fen) {
             break
           }
         }
+      } else{
+        console.log('wtf why not an object?')
       }
 
       /* failed to find move */
@@ -1627,53 +1186,6 @@ var Chess = function (fen) {
 
     get: function (square) {
       return get(square)
-    },
-
-    remove: function (square) {
-      return remove(square)
-    },
-
-    perft: function (depth) {
-      return perft(depth)
-    },
-
-    square_color: function (square) {
-      if (square in SQUARES) {
-        var sq_0x88 = SQUARES[square]
-        return (rank(sq_0x88) + file(sq_0x88)) % 2 === 0 ? 'light' : 'dark'
-      }
-
-      return null
-    },
-
-    get_comment: function () {
-      return comments[generate_fen()]
-    },
-
-    set_comment: function (comment) {
-      comments[generate_fen()] = comment.replace('{', '[').replace('}', ']')
-    },
-
-    delete_comment: function () {
-      var comment = comments[generate_fen()]
-      delete comments[generate_fen()]
-      return comment
-    },
-
-    get_comments: function () {
-      prune_comments()
-      return Object.keys(comments).map(function (fen) {
-        return { fen: fen, comment: comments[fen] }
-      })
-    },
-
-    delete_comments: function () {
-      prune_comments()
-      return Object.keys(comments).map(function (fen) {
-        var comment = comments[fen]
-        delete comments[fen]
-        return { fen: fen, comment: comment }
-      })
     },
   }
 }
