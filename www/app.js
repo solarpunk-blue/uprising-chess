@@ -12,9 +12,16 @@ app = {
     userLoggedIn: false,
     block: Block('div', 'app'),
     // initialize firebase
-    firebase: (function () {
+     firebase: (function () {
         window.firebase.initializeApp({
-
+          apiKey: "AIzaSyBYZlamd_ysPmrtpkYKkM87049ArHkb",
+          authDomain: "uprisingchess.firebaseapp.co",
+          databaseURL: "https://uprisingchess-default-rtdb.firebaseio.com",
+          projectId: "uprisingchess",
+          storageBucket: "uprisingchess.appspot.com",
+          messagingSenderId: "384461509485",
+          appId: "1:384461509485:web:98de415664af0652a88064",
+          measurementId: "G-3VJ7Z1XPFX"
         });
         return window.firebase;
     })(),
