@@ -620,7 +620,7 @@ app
                 margin 12px 17px
             a link
                 target _blank
-                href https://solarpunk.blue/commentary/2021/10/09/uprising-chess
+                href https://bonkerfield.org/2021/10/uprising-chess
                 icon github
                     src img/solarpunk_blue_logo.jpeg
         div help
@@ -822,7 +822,7 @@ app
                                 <br/>
                                 In addition, when the Capitalist pieces take a Worker pawn, the pawn isn't removed from the game, but is just replaced in either of the factories in the same column. If both factories are already full in the column where the pawn is attacked, then the pawn is removed from the game.<br/>
                                 Finally, the Capitalists' king is constrained to remain within the middle two rows (rows 4 and 5).
-                                For more detailed discussion of the rules and some strategy see <a href='https://solarpunk.blue/commentary/2021/10/09/uprising-chess.html' target='_blank'>solarpunk.blue's article</a>.
+                                For more detailed discussion of the rules and some strategy see <a href='https://bonkerfield.org/2021/10/uprising-chess' target='_blank'>bonkerfield's article</a>.
                             `
                     title t4
                         val objective
@@ -830,21 +830,21 @@ app
                         html
                             `
                                 The objective for the Workers is to put the Capitalist's King in check (AKA overthrowing capitalism).  For the Capitalists, the objective is to keep workers in their factories for as much of the game as possible. A scoreboard at the bottom shows a score based on how many factories have been open each day. For each column, Capitalists get 1 pt if both factories squares are filled, Workers get 1 pt if either is empty. <br/>
-                                If you want to learn more you can check out <a href='https://solarpunk.blue/commentary/2021/10/09/uprising-chess.html' target='_blank'>this article</a>.
+                                If you want to learn more you can check out <a href='https://bonkerfield.org/2021/10/uprising-chess' target='_blank'>this article</a>.
                             `
                     title t5
                         val contributors
                     paragraph p5
                         html
                             `
-                                This game is a product of <a href="https://solarpunk.blue" target='_blank'>Solarpunk Blue</a>, an organization creating games and fiction to imagine a more equitable and sustainable world. The game was predominantly devised and developed by <a href='https://will.stedden.org' target='_blank'>Will Stedden</a>.  If you'd like to contribute to support maintenance of the game or say thank you to those who built it for your enjoyment, feel free to check out <a href="https://opencollective.com/solarpunk-blue/projects/uprising-chess" target='_blank'>the Uprising Chess donation page on OpenCollective</a>.  Thank you.
+                                This game is a product of <a href="https://bonkerfield.org" target='_blank'>Prof Bonkerfield</a>, an organization creating games and fiction to imagine a more equitable and sustainable world. The game was predominantly devised and developed by <a href='https://will.stedden.org' target='_blank'>Will Stedden</a>. Thank you.
                             `
                     title t6
                         val news and updates
                     paragraph p6
                         html
                             `
-                                Uprising Chess is under active development. To get the latest news follow us on <a href="https://instagram.com/solarpunk.blue" target="_blank">instagram</a> or <a href="https://twitter.com/solarpunk_blue" target="_blank">twitter</a> or check out our <a href="https://opencollective.com/solarpunk-blue/projects/uprising-chess" target='_blank'>page on OpenCollective</a>.
+                                Uprising Chess is under active development. To get the latest news follow us on <a href="https://instagram.com/bonkerfield" target="_blank">instagram</a> or <a href="https://sigmoid.social/@bonkerfield" target="_blank">mastodon</a>.
 
                                 If you run into trouble or want to help with changes, please let us know on our <a href = 'http://github.com/stedn/uprising-chess' target = '_blank'>Github project</a>.  This project wouldn't have been possible without the open-source community, paritcularly Anuv Gupta's <a href = 'http://github.com/anuvgupta/chessroom.ml' target = '_blank'>chessroom.ml</a>, and Gautam Bajaj's <a href="https://github.com/gautambajaj/Chess-AI/" target='_blank'>Chess-AI</a>.<br/>
                             `
